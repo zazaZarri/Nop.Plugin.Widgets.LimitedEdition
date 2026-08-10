@@ -1,0 +1,52 @@
+<script>
+(function () {
+    function pad(n) {
+        return n.toString().padStart(2, "0");
+    }
+
+    function initTimer(box) {
+        var endStr = box.getAttribute("data-end");
+        var expiredText = box.getAttribute("data-expired") || "Offerta scaduta!";
+
+        if (!endStr) {
+            console.warn("LimitedEdition: data-end mancante");
+            return;
+        }
+
+        var end = new Date(endStr).getTime();
+        if (isNaN(end)) {
+            console.warn("LimitedEdition: data non valida", endStr);
+            return;
+        }
+
+        var daysEl    = box.querySelector(".days");
+        var hoursEl   = box.querySelector(".hours");
+        var minutesEl = box.querySelector(".minutes");
+        var secondsEl = box.querySelector(".seconds");
+
+        if (!daysEl || !hoursEl || !minutesEl || !secondsEl) {
+            console.warn("LimitedEdition: elementi .days / .hours / .minutes / .seconds mancanti");
+            return;
+        }
+
+        function update() {
+            var diff = end - Date.now();
+
+            if (diff <= 0) {
+                box.innerHTML = expiredText;
+                return;
+            }
+
+            daysEl.textContent    = pad(Math.floor(diff / 86400000));
+            hoursEl.textContent   = pad(Math.floor((diff % 86400000) / 3600000));
+            minutesEl.textContent = pad(Math.floor((diff % 3600000) / 60000));
+            secondsEl.textContent = pad(Math.floor((diff % 60000) / 1000));
+        }
+
+        update();
+        setInterval(update, 1000);
+    }
+
+    document.querySelectorAll(".le-countdown[data-end]").forEach(initTimer);
+})();
+</script>

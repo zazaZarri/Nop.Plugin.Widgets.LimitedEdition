@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Copyright>Copyright © Il Tuo Nome</Copyright>
+    <Company>Il Tuo Nome</Company>
+    <Authors>Il Tuo Nome</Authors>
+    <PackageProjectUrl></PackageProjectUrl>
+    <OutputPath>$(SolutionDir)\Presentation\Nop.Web\Plugins\Widgets.LimitedEdition</OutputPath>
+    <OutDir>$(OutputPath)</OutDir>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="plugin.json" />
+    <None Remove="Views\Shared\Components\WidgetsLimitedEdition\LimitedEditionView.cshtml" />
+    <None Remove="Views\Shared\Components\WidgetsLimitedEdition\_CountdownScript.cshtml" />
+    <None Remove="Views\_ProductsGrid.cshtml" />
+    <None Remove="Views\_ViewImports.cshtml" />
+    <None Remove="Views\Configure.cshtml" />
+    <None Remove="Views\_SettingsForm.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="plugin.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\**\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SolutionDir)\Presentation\Nop.Web\Nop.Web.csproj" />
+    <ProjectReference Include="$(SolutionDir)\Libraries\Nop.Data\Nop.Data.csproj" />
+    <ProjectReference Include="..\Nop.Plugin.Misc.Notes\Nop.Plugin.Misc.Notes.csproj" />
+    <ClearPluginAssemblies Include="$(SolutionDir)\Build\ClearPluginAssemblies.proj" />
+  </ItemGroup>
+
+  <!-- This target execute after "Build" target -->
+  <Target Name="NopTarget" AfterTargets="Build">
+    <!-- Delete unnecessary libraries from plugins path -->
+    <MSBuild Projects="@(ClearPluginAssemblies)" Properties="PluginPath=$(OutDir)" Targets="NopClear" />
+  </Target>
+</Project>

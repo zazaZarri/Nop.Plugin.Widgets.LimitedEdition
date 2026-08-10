@@ -1,0 +1,209 @@
+@model LimitedTimeProductSearchModel
+
+@using Nop.Web.Framework.Models
+@using Nop.Web.Framework.Models.DataTables
+@using Nop.Web.Framework.Mvc
+
+<div class="card-body">
+
+    <div class="mb-3">
+        <button type="button" id="btn-add-product" class="btn btn-primary" data-toggle="modal" data-target="#limitedtime-modal">
+            <i class="fas fa-plus-square"></i>
+            Aggiungi Prodotto a Tempo Limitato
+        </button>
+    </div>
+
+    @await Html.PartialAsync("Table", new DataTablesModel
+    {
+        Name = "limitedtimeproducts-grid",
+        UrlRead = new DataUrl("ProductList", "LimitedTime", null),
+        UrlDelete = new DataUrl("ProductDelete", "LimitedTime", null),
+        Length = Model.PageSize,
+        LengthMenu = Model.AvailablePageSizes,
+        ColumnCollection = new List<ColumnProperty>
+        {
+            new ColumnProperty(nameof(LimitedTimeProductModel.ProductName))
+            {
+                Title = "Prodotto",
+                Width = "300"
+            },
+            new ColumnProperty(nameof(LimitedTimeProductModel.StartDateUtc))
+            {
+                Title = "Data Inizio (UTC)",
+                Width = "180",
+                Render = new RenderDate()
+            },
+            new ColumnProperty(nameof(LimitedTimeProductModel.EndDateUtc))
+            {
+                Title = "Data Fine (UTC)",
+                Width = "180",
+                Render = new RenderDate()
+            },
+            new ColumnProperty(nameof(LimitedTimeProductModel.IsActive))
+            {
+                Title = "Attivo",
+                Width = "100",
+                Render = new RenderBoolean()
+            },
+            new ColumnProperty(nameof(LimitedTimeProductModel.Id))
+            {
+                Title = "Elimina",
+                Width = "100",
+                ClassName = NopColumnClassDefaults.Button,
+                Render = new RenderButtonRemove("Elimina")
+            }
+        }
+    })
+
+</div>
+
+<!-- Modal Aggiungi/Modifica Prodotto -->
+<div class="modal fade" id="limitedtime-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Aggiungi Prodotto a Tempo Limitato</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <input type="hidden" id="ltp-id" value="0" />
+
+                <div class="form-group row">
+                    <div class="col-md-3">
+                        <label>Prodotto</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input type="text" id="ltp-product-search" class="form-control" placeholder="Digita per cercare un prodotto..." autocomplete="off" />
+                        <input type="hidden" id="ltp-product-id" value="" />
+                        <span id="ltp-product-selected" class="text-muted"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-md-3">
+                        <label>Data Inizio (UTC)</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input type="datetime-local" id="ltp-start-date" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-md-3">
+                        <label>Data Fine (UTC)</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input type="datetime-local" id="ltp-end-date" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-md-3">
+                        <label>Attivo</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input type="checkbox" id="ltp-is-active" checked="checked" />
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annulla</button>
+                <button type="button" id="btn-save-product" class="btn btn-primary">Salva</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        $('#btn-add-product').on('click', function () {
+            $('#ltp-id').val('0');
+            $('#ltp-product-id').val('');
+            $('#ltp-product-search').val('');
+            $('#ltp-product-selected').text('');
+            $('#ltp-start-date').val('');
+            $('#ltp-end-date').val('');
+            $('#ltp-is-active').prop('checked', true);
+        });
+
+        $('#ltp-product-search').autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '@Url.Action("ProductSearchAutocomplete", "LimitedTime", new { area = "Admin" })',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: { term: request.term },
+                    success: function (data) {
+                        response(data);
+                    },
+                    error: function () {
+                        response([]);
+                    }
+                });
+            },
+            minLength: 1,
+            delay: 300,
+            select: function (event, ui) {
+                $('#ltp-product-id').val(ui.item.id);
+                $('#ltp-product-selected').html('<strong>Selezionato:</strong> ' + ui.item.label);
+                $('#ltp-product-search').val(ui.item.value);
+                return false;
+            },
+            focus: function (event, ui) {
+                return false;
+            }
+        }).autocomplete("instance")._renderItem = function (ul, item) {
+            return $("<li>")
+                .append("<div>" + item.label + "</div>")
+                .appendTo(ul);
+        };
+
+        $(document).on('autocompleteopen', function () {
+            $('.ui-autocomplete').css('z-index', 99999);
+        });
+
+        $('#btn-save-product').on('click', function () {
+            var productId = $('#ltp-product-id').val();
+            if (!productId) {
+                alert('Seleziona un prodotto dalla lista.');
+                return;
+            }
+
+            var data = {
+                Id: $('#ltp-id').val(),
+                ProductId: productId,
+                StartDateUtc: $('#ltp-start-date').val(),
+                EndDateUtc: $('#ltp-end-date').val(),
+                IsActive: $('#ltp-is-active').is(':checked')
+            };
+
+            $.ajax({
+                url: '@Url.Action("ProductUpdate", "LimitedTime", new { area = "Admin" })',
+                type: 'POST',
+                data: data,
+                headers: { RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
+                success: function () {
+                    $('#limitedtime-modal').modal('hide');
+                    updateTable('#limitedtimeproducts-grid');
+                },
+                error: function () {
+                    alert('Errore durante il salvataggio.');
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    .ui-autocomplete {
+        z-index: 99999 !important;
+        max-height: 300px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+</style>

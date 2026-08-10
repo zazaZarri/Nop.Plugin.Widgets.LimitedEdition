@@ -1,0 +1,192 @@
+@using System.Linq
+@model Nop.Plugin.Widgets.LimitedEdition.Models.HomepageOffersModel
+
+<style>
+    .le-wrap {
+        --le-gold: #d4af37;
+        --le-gold-light: #f4e5a1;
+        font-family: inherit;
+    }
+
+    .le-card {
+        position: relative;
+        background: linear-gradient(145deg, #0b0b0f 0%, #1a1a22 55%, #0b0b0f 100%);
+        border: 1px solid rgba(212, 175, 55, 0.45);
+        border-radius: 16px;
+        padding: 28px 24px 24px;
+        margin-bottom: 22px;
+        text-align: center;
+        overflow: hidden;
+        box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.08),
+                    0 12px 40px rgba(0, 0, 0, 0.45),
+                    0 0 28px rgba(212, 175, 55, 0.15);
+        animation: le-glow 3s ease-in-out infinite;
+    }
+
+    @@keyframes le-glow {
+        0%, 100% { box-shadow: 0 0 0 1px rgba(212,175,55,.08), 0 12px 40px rgba(0,0,0,.45), 0 0 18px rgba(212,175,55,.12); }
+        50%      { box-shadow: 0 0 0 1px rgba(212,175,55,.18), 0 12px 40px rgba(0,0,0,.45), 0 0 34px rgba(212,175,55,.35); }
+    }
+
+    .le-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent 30%, rgba(212,175,55,.10) 40%, transparent 67%);
+        background-size: 220% 100%;
+        animation: le-sheen 6s linear infinite;
+        pointer-events: none;
+    }
+
+    @@keyframes le-sheen {
+        0%   { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    .le-badge {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #1a1a22;
+        background: linear-gradient(90deg, var(--le-gold-light), var(--le-gold));
+        padding: 5px 14px;
+        border-radius: 999px;
+        margin-bottom: 14px;
+        box-shadow: 0 2px 10px rgba(212, 175, 55, 0.5);
+    }
+
+    .le-title {
+        margin: 0 0 6px;
+        font-size: 22px;
+        font-weight: 700;
+        color: #ffffff;
+        letter-spacing: .3px;
+    }
+
+    .le-message {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.72);
+        margin-bottom: 18px;
+    }
+
+    .le-countdown {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin: 4px 0 20px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .le-time-box {
+        min-width: 58px;
+        background: rgba(212, 175, 55, 0.08);
+        border: 1px solid rgba(212, 175, 55, 0.35);
+        border-radius: 10px;
+        padding: 8px 5px 6px;
+    }
+
+    .le-time-box span {
+        display: block;
+        font-size: 26px;
+        font-weight: 800;
+        line-height: 1;
+        color: var(--le-gold-light);
+        text-shadow: 0 0 12px rgba(212, 175, 55, 0.55);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .le-time-box small {
+        display: block;
+        margin-top: 4px;
+        font-size: 9px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.45);
+    }
+
+    .le-cta {
+        position: relative;
+        display: inline-block;
+        overflow: hidden;
+        background: linear-gradient(90deg, var(--le-gold), var(--le-gold-light));
+        color: #1a1a22;
+        font-weight: 700;
+        letter-spacing: .4px;
+        padding: 11px 28px;
+        border-radius: 999px;
+        text-decoration: none;
+        transition: transform .2s ease, box-shadow .2s ease;
+        box-shadow: 0 6px 18px rgba(212, 175, 55, 0.35);
+    }
+
+    .le-cta:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 26px rgba(212, 175, 55, 0.55);
+        color: #1a1a22;
+    }
+
+    .le-card--product {
+        padding: 20px 20px 18px;
+    }
+
+    .le-card--product .le-countdown {
+        margin-bottom: 4px;
+    }
+</style>
+
+@if (Model.IsProductPage)
+{
+    var offer = Model.Offers.FirstOrDefault();
+    if (offer != null)
+    {
+        var endDateJs = offer.EndDateUtc.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+
+        <div class="le-wrap">
+            <div class="le-card le-card--product">
+                <span class="le-badge">&#9889; Edizione Limitata</span>
+                <div class="le-message">@offer.CustomMessage</div>
+
+                <div class="le-countdown"
+                     data-end="@endDateJs"
+                     data-expired="Offerta scaduta!">
+                    <div class="le-time-box"><span class="days">00</span><small>Giorni</small></div>
+                    <div class="le-time-box"><span class="hours">00</span><small>Ore</small></div>
+                    <div class="le-time-box"><span class="minutes">00</span><small>Min</small></div>
+                    <div class="le-time-box"><span class="seconds">00</span><small>Sec</small></div>
+                </div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="le-wrap">
+        @foreach (var offer in Model.Offers)
+        {
+            var endDateJs = offer.EndDateUtc.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+
+            <div class="le-card">
+                <span class="le-badge">&#9889; Edizione Limitata</span>
+                <h3 class="le-title">@offer.ProductName</h3>
+                <div class="le-message">@offer.CustomMessage</div>
+
+                <div class="le-countdown"
+                     data-end="@endDateJs"
+                     data-expired="Scaduta">
+                    <div class="le-time-box"><span class="days">00</span><small>Giorni</small></div>
+                    <div class="le-time-box"><span class="hours">00</span><small>Ore</small></div>
+                    <div class="le-time-box"><span class="minutes">00</span><small>Min</small></div>
+                    <div class="le-time-box"><span class="seconds">00</span><small>Sec</small></div>
+                </div>
+
+                <a href="@offer.ProductUrl" class="le-cta">Vedi offerta &rarr;</a>
+            </div>
+        }
+    </div>
+}
+
+@* Un solo script per tutti i timer *@
+@await Html.PartialAsync("~/Plugins/Widgets.LimitedEdition/Views/Shared/_CountdownScript.cshtml")

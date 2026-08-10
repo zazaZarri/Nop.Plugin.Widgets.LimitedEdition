@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Widgets",
+  "FriendlyName": "Limited Edition Products",
+  "SystemName": "Widgets.LimitedEdition",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.90" ],
+  "Author": "Il Tuo Nome",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Widgets.LimitedEdition.dll",
+  "Description": "Mostra un timer di conto alla rovescia sui prodotti impostati come 'a tempo limitato'."
+}
