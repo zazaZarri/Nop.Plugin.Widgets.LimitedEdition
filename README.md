@@ -6,7 +6,7 @@
 # It also includes pop-ups—triggered for instance when a shopper visits the cart that is designed to draw attention to these limited-time products.
 
 
-# Future updates will include the ability to customize the style, colors, and other aspects of the home page panel.
+# Always check the new versions to stay up to date with the latest updates.
 
 
 
