@@ -1,56 +1,854 @@
 @model ConfigurationModel
 
-<div class="form-group row">
-    <div class="col-md-3">
-        <nop-label asp-for="BackgroundColor" />
+<style>
+    .le-admin-preview-wrap {
+        position: sticky;
+        top: 70px;
+        background: #f4f4f5;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+    .le-admin-preview-wrap h5 {
+        margin: 0 0 12px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #666;
+    }
+    #le-live-preview.le-wrap {
+        --le-accent: #d4af37;
+        --le-accent-light: #f4e5a1;
+        --le-bg-start: #0b0b0f;
+        --le-bg-mid: #1a1a22;
+        --le-bg-end: #0b0b0f;
+        --le-border: rgba(212, 175, 55, 0.45);
+        --le-title: #ffffff;
+        --le-message: rgba(255, 255, 255, 0.72);
+        --le-badge-text: #1a1a22;
+        --le-badge-bg-start: #f4e5a1;
+        --le-badge-bg-end: #d4af37;
+        --le-digit: #f4e5a1;
+        --le-label: rgba(255, 255, 255, 0.45);
+        --le-box-bg: rgba(212, 175, 55, 0.08);
+        --le-box-border: rgba(212, 175, 55, 0.35);
+        --le-cta-bg-start: #d4af37;
+        --le-cta-bg-end: #f4e5a1;
+        --le-cta-text: #1a1a22;
+        --le-digit-size: 26px;
+        --le-label-size: 9px;
+        --le-box-min-w: 58px;
+        --le-box-radius: 10px;
+        --le-box-pad: 8px;
+        --le-timer-gap: 10px;
+        --le-card-radius: 16px;
+        --le-card-pad-t: 28px;
+        --le-card-pad-s: 24px;
+        --le-card-pad-b: 24px;
+        --le-card-margin-b: 0;
+        --le-card-border-w: 1px;
+        --le-card-align: center;
+        --le-title-size: 22px;
+        --le-title-weight: 700;
+        --le-msg-size: 14px;
+        --le-badge-size: 11px;
+        --le-badge-weight: 800;
+        --le-badge-ls: 2px;
+        --le-badge-py: 5px;
+        --le-badge-px: 14px;
+        --le-cta-size: 14px;
+        --le-cta-weight: 700;
+        --le-cta-py: 11px;
+        --le-cta-px: 28px;
+        --le-cta-radius: 999px;
+        --le-font: inherit;
+        font-family: var(--le-font);
+    }
+    #le-live-preview .le-card {
+        position: relative;
+        background: linear-gradient(145deg, var(--le-bg-start) 0%, var(--le-bg-mid) 55%, var(--le-bg-end) 100%);
+        border: var(--le-card-border-w) solid var(--le-border);
+        border-radius: var(--le-card-radius);
+        padding: var(--le-card-pad-t) var(--le-card-pad-s) var(--le-card-pad-b);
+        text-align: var(--le-card-align);
+        overflow: hidden;
+        box-shadow: 0 12px 40px rgba(0,0,0,.35);
+        font-family: var(--le-font);
+    }
+    #le-live-preview .le-badge {
+        display: inline-block;
+        font-size: var(--le-badge-size);
+        font-weight: var(--le-badge-weight);
+        letter-spacing: var(--le-badge-ls);
+        text-transform: uppercase;
+        color: var(--le-badge-text);
+        background: linear-gradient(90deg, var(--le-badge-bg-start), var(--le-badge-bg-end));
+        padding: var(--le-badge-py) var(--le-badge-px);
+        border-radius: 999px;
+        margin-bottom: 14px;
+    }
+    #le-live-preview .le-title {
+        margin: 0 0 6px;
+        font-size: var(--le-title-size);
+        font-weight: var(--le-title-weight);
+        color: var(--le-title);
+    }
+    #le-live-preview .le-message {
+        font-size: var(--le-msg-size);
+        color: var(--le-message);
+        margin-bottom: 18px;
+    }
+    #le-live-preview .le-countdown {
+        display: flex;
+        justify-content: center;
+        gap: var(--le-timer-gap);
+        margin: 4px 0 20px;
+        flex-wrap: wrap;
+    }
+    #le-live-preview.le-layout-boxed .le-countdown {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        max-width: 320px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    #le-live-preview.le-layout-minimal .le-time-box {
+        background: transparent;
+        border: none;
+        min-width: auto;
+        padding: 0 4px;
+    }
+    #le-live-preview.le-layout-minimal .le-time-box small { display: none; }
+    #le-live-preview .le-time-box {
+        min-width: var(--le-box-min-w);
+        background: var(--le-box-bg);
+        border: 1px solid var(--le-box-border);
+        border-radius: var(--le-box-radius);
+        padding: var(--le-box-pad) 5px 6px;
+    }
+    #le-live-preview .le-time-box span {
+        display: block;
+        font-size: var(--le-digit-size);
+        font-weight: 800;
+        line-height: 1;
+        color: var(--le-digit);
+        font-variant-numeric: tabular-nums;
+    }
+    #le-live-preview .le-time-box small {
+        display: block;
+        margin-top: 4px;
+        font-size: var(--le-label-size);
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--le-label);
+    }
+    #le-live-preview .le-cta {
+        display: inline-block;
+        background: linear-gradient(90deg, var(--le-cta-bg-start), var(--le-cta-bg-end));
+        color: var(--le-cta-text);
+        font-weight: var(--le-cta-weight);
+        font-size: var(--le-cta-size);
+        padding: var(--le-cta-py) var(--le-cta-px);
+        border-radius: var(--le-cta-radius);
+        text-decoration: none;
+    }
+    .le-settings-section {
+        border: 1px solid #e5e5e5;
+        border-radius: 6px;
+        margin-bottom: 18px;
+        overflow: hidden;
+    }
+    .le-settings-section > .section-header {
+        background: #f8f9fa;
+        padding: 10px 16px;
+        font-weight: 600;
+        cursor: pointer;
+        user-select: none;
+        border-bottom: 1px solid #e5e5e5;
+    }
+    .le-settings-section > .section-body { padding: 16px 12px 8px; }
+    .le-color-row input[type="color"] {
+        width: 42px;
+        height: 34px;
+        padding: 2px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        cursor: pointer;
+        vertical-align: middle;
+    }
+    .le-color-row input[type="text"].le-color-hex,
+    .le-color-row input.le-color-hex {
+        width: 140px;
+        display: inline-block;
+        margin-left: 8px;
+        vertical-align: middle;
+    }
+    .le-range-val {
+        display: inline-block;
+        min-width: 42px;
+        margin-left: 8px;
+        font-weight: 600;
+        color: #555;
+    }
+    .le-field-label {
+        font-weight: 600;
+        padding-top: 7px;
+    }
+</style>
+
+<!-- Google Fonts usati nel selettore -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Inter:wght@400;600;700;800&family=Lato:wght@400;700;900&family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;600;700;800&family=Oswald:wght@400;600;700&family=Playfair+Display:wght@400;700&family=Poppins:wght@400;600;700;800&family=Raleway:wght@400;600;700;800&family=Roboto:wght@400;500;700;900&family=Rubik:wght@400;600;700&family=Source+Sans+3:wght@400;600;700&family=Space+Grotesk:wght@400;600;700&family=Work+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+
+<div class="row">
+    <div class="col-md-7">
+
+        <!-- TESTI -->
+        <div class="le-settings-section">
+            <div class="section-header" data-toggle="collapse" data-target="#sec-testi">Testi &amp; etichette</div>
+            <div id="sec-testi" class="section-body collapse show">
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Messaggio personalizzato</label></div>
+                    <div class="col-md-8"><textarea asp-for="CustomMessage" class="form-control" rows="2"></textarea></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Testo badge</label></div>
+                    <div class="col-md-8"><input asp-for="BadgeText" class="form-control" /></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Testo pulsante CTA</label></div>
+                    <div class="col-md-8"><input asp-for="CtaText" class="form-control" /></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Testo offerta scaduta</label></div>
+                    <div class="col-md-8"><input asp-for="ExpiredText" class="form-control" /></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-3"><label class="le-field-label">Giorni</label></div>
+                    <div class="col-md-3"><input asp-for="DaysLabel" class="form-control" /></div>
+                    <div class="col-md-3"><label class="le-field-label">Ore</label></div>
+                    <div class="col-md-3"><input asp-for="HoursLabel" class="form-control" /></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-3"><label class="le-field-label">Minuti</label></div>
+                    <div class="col-md-3"><input asp-for="MinutesLabel" class="form-control" /></div>
+                    <div class="col-md-3"><label class="le-field-label">Secondi</label></div>
+                    <div class="col-md-3"><input asp-for="SecondsLabel" class="form-control" /></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LAYOUT -->
+        <div class="le-settings-section">
+            <div class="section-header" data-toggle="collapse" data-target="#sec-layout">Layout &amp; visibilità</div>
+            <div id="sec-layout" class="section-body collapse show">
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Layout timer</label></div>
+                    <div class="col-md-8">
+                        <select asp-for="TimerLayoutId" class="form-control" id="TimerLayoutId">
+                            <option value="0">Horizontal</option>
+                            <option value="1">Boxed (griglia 4 colonne)</option>
+                            <option value="2">Minimal (solo cifre)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Allineamento testo</label></div>
+                    <div class="col-md-8">
+                        <select asp-for="CardTextAlign" class="form-control" id="CardTextAlign">
+                            <option value="center">Centro</option>
+                            <option value="left">Sinistra</option>
+                            <option value="right">Destra</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Font</label></div>
+                    <div class="col-md-8">
+                        <select asp-for="FontFamily" class="form-control" id="FontFamily">
+                            <option value="inherit">Default del tema</option>
+                            <option value="'Inter', sans-serif">Inter</option>
+                            <option value="'Roboto', sans-serif">Roboto</option>
+                            <option value="'Open Sans', sans-serif">Open Sans</option>
+                            <option value="'Montserrat', sans-serif">Montserrat</option>
+                            <option value="'Poppins', sans-serif">Poppins</option>
+                            <option value="'Lato', sans-serif">Lato</option>
+                            <option value="'Raleway', sans-serif">Raleway</option>
+                            <option value="'Oswald', sans-serif">Oswald</option>
+                            <option value="'Playfair Display', serif">Playfair Display</option>
+                            <option value="'Bebas Neue', sans-serif">Bebas Neue</option>
+                            <option value="'Anton', sans-serif">Anton</option>
+                            <option value="'Rubik', sans-serif">Rubik</option>
+                            <option value="'Work Sans', sans-serif">Work Sans</option>
+                            <option value="'Source Sans 3', sans-serif">Source Sans 3</option>
+                            <option value="'Space Grotesk', sans-serif">Space Grotesk</option>
+                            <option value="Georgia, serif">Georgia</option>
+                            <option value="'Times New Roman', Times, serif">Times New Roman</option>
+                            <option value="Arial, Helvetica, sans-serif">Arial</option>
+                            <option value="'Courier New', Courier, monospace">Courier New</option>
+                            <option value="system-ui, -apple-system, sans-serif">System UI</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-3"><input asp-for="ShowBadge" /> <label for="ShowBadge">Mostra badge</label></div>
+                    <div class="col-md-3"><input asp-for="ShowTitle" /> <label for="ShowTitle">Mostra titolo</label></div>
+                    <div class="col-md-3"><input asp-for="ShowMessage" /> <label for="ShowMessage">Mostra messaggio</label></div>
+                    <div class="col-md-3"><input asp-for="ShowCta" /> <label for="ShowCta">Mostra CTA</label></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><input asp-for="EnableGlowAnimation" /> <label for="EnableGlowAnimation">Animazione glow</label></div>
+                    <div class="col-md-4"><input asp-for="EnableSheenAnimation" /> <label for="EnableSheenAnimation">Animazione sheen</label></div>
+                    <div class="col-md-4"><input asp-for="HideProductWhenExpired" /> <label for="HideProductWhenExpired">Nascondi se scaduto</label></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLORI -->
+        <div class="le-settings-section">
+            <div class="section-header" data-toggle="collapse" data-target="#sec-colori">Colori</div>
+            <div id="sec-colori" class="section-body collapse show">
+                @{
+                    void ColorRow(string prop, string label)
+                    {
+                        <div class="form-group row le-color-row">
+                            <div class="col-md-4"><label class="le-field-label">@label</label></div>
+                            <div class="col-md-8">
+                                <input type="color" class="le-color-picker" data-target="@prop" />
+                                <input name="@prop" id="@prop" class="form-control le-color-hex" data-field="@prop" value="@(ViewData.Eval(prop))" />
+                            </div>
+                        </div>
+                    }
+                }
+                <div class="form-group row le-color-row">
+                    <div class="col-md-4"><label class="le-field-label">Colore accento</label></div>
+                    <div class="col-md-8">
+                        <input type="color" class="le-color-picker" data-target="AccentColor" />
+                        <input asp-for="AccentColor" class="form-control le-color-hex" data-field="AccentColor" />
+                    </div>
+                </div>
+                <div class="form-group row le-color-row">
+                    <div class="col-md-4"><label class="le-field-label">Accento chiaro</label></div>
+                    <div class="col-md-8">
+                        <input type="color" class="le-color-picker" data-target="AccentColorLight" />
+                        <input asp-for="AccentColorLight" class="form-control le-color-hex" data-field="AccentColorLight" />
+                    </div>
+                </div>
+                <div class="form-group row le-color-row">
+                    <div class="col-md-4"><label class="le-field-label">Sfondo card (inizio)</label></div>
+                    <div class="col-md-8">
+                        <input type="color" class="le-color-picker" data-target="CardBackgroundStart" />
+                        <input asp-for="CardBackgroundStart" class="form-control le-color-hex" data-field="CardBackgroundStart" />
+                    </div>
+                </div>
+                <div class="form-group row le-color-row">
+                    <div class="col-md-4"><label class="le-field-label">Sfondo card (mezzo)</label></div>
+                    <div class="col-md-8">
+                        <input type="color" class="le-color-picker" data-target="CardBackgroundMid" />
+                        <input asp-for="CardBackgroundMid" class="form-control le-color-hex" data-field="CardBackgroundMid" />
+                    </div>
+                </div>
+                <div class="form-group row le-color-row">
+                    <div class="col-md-4"><label class="le-field-label">Sfondo card (fine)</label></div>
+                    <div class="col-md-8">
+                        <input type="color" class="le-color-picker" data-target="CardBackgroundEnd" />
+                        <input asp-for="CardBackgroundEnd" class="form-control le-color-hex" data-field="CardBackgroundEnd" />
+                    </div>
+                </div>
+                <div class="form-group row le-color-row">
+                    <div class="col-md-4"><label class="le-field-label">Colore bordo</label></div>
+                    <div class="col-md-8">
+                        <input type="color" class="le-color-picker" data-target="BorderColor" />
+                        <input asp-for="BorderColor" class="form-control le-color-hex" data-field="BorderColor" />
+                    </div>
+                </div>
+                <div class="form-group row le-color-row">
+                    <div class="col-md-4"><label class="le-field-label">Colore titolo</label></div>
+                    <div class="col-md-8">
+                        <input type="color" class="le-color-picker" data-target="TitleColor" />
+                        <input asp-for="TitleColor" class="form-control le-color-hex" data-field="TitleColor" />
+                    </div>
+                </div>
+                <div class="form-group row le-color-row">
+                    <div class="col-md-4"><label class="le-field-label">Colore messaggio</label></div>
+                    <div class="col-md-8">
+                        <input type="color" class="le-color-picker" data-target="MessageColor" />
+                        <input asp-for="MessageColor" class="form-control le-color-hex" data-field="MessageColor" />
+                    </div>
+                </div>
+                <div class="form-group row le-color-row">
+                    <div class="col-md-4"><label class="le-field-label">Testo badge</label></div>
+                    <div class="col-md-8">
+                        <input type="color" class="le-color-picker" data-target="BadgeTextColor" />
+                        <input asp-for="BadgeTextColor" class="form-control le-color-hex" data-field="BadgeTextColor" />
+                    </div>
+                </div>
+                <div class="form-group row le-color-row">
+                    <div class="col-md-4"><label class="le-field-label">Sfondo badge (inizio)</label></div>
+                    <div class="col-md-8">
+                        <input type="color" class="le-color-picker" data-target="BadgeBackgroundStart" />
+                        <input asp-for="BadgeBackgroundStart" class="form-control le-color-hex" data-field="BadgeBackgroundStart" />
+                    </div>
+                </div>
+                <div class="form-group row le-color-row">
+                    <div class="col-md-4"><label class="le-field-label">Sfondo badge (fine)</label></div>
+                    <div class="col-md-8">
+                        <input type="color" class="le-color-picker" data-target="BadgeBackgroundEnd" />
+                        <input asp-for="BadgeBackgroundEnd" class="form-control le-color-hex" data-field="BadgeBackgroundEnd" />
+                    </div>
+                </div>
+                <div class="form-group row le-color-row">
+                    <div class="col-md-4"><label class="le-field-label">Cifre timer</label></div>
+                    <div class="col-md-8">
+                        <input type="color" class="le-color-picker" data-target="TimerDigitColor" />
+                        <input asp-for="TimerDigitColor" class="form-control le-color-hex" data-field="TimerDigitColor" />
+                    </div>
+                </div>
+                <div class="form-group row le-color-row">
+                    <div class="col-md-4"><label class="le-field-label">Etichette timer</label></div>
+                    <div class="col-md-8">
+                        <input type="color" class="le-color-picker" data-target="TimerLabelColor" />
+                        <input asp-for="TimerLabelColor" class="form-control le-color-hex" data-field="TimerLabelColor" />
+                    </div>
+                </div>
+                <div class="form-group row le-color-row">
+                    <div class="col-md-4"><label class="le-field-label">Sfondo box timer</label></div>
+                    <div class="col-md-8">
+                        <input type="color" class="le-color-picker" data-target="TimerBoxBackground" />
+                        <input asp-for="TimerBoxBackground" class="form-control le-color-hex" data-field="TimerBoxBackground" />
+                    </div>
+                </div>
+                <div class="form-group row le-color-row">
+                    <div class="col-md-4"><label class="le-field-label">Bordo box timer</label></div>
+                    <div class="col-md-8">
+                        <input type="color" class="le-color-picker" data-target="TimerBoxBorderColor" />
+                        <input asp-for="TimerBoxBorderColor" class="form-control le-color-hex" data-field="TimerBoxBorderColor" />
+                    </div>
+                </div>
+                <div class="form-group row le-color-row">
+                    <div class="col-md-4"><label class="le-field-label">Sfondo CTA (inizio)</label></div>
+                    <div class="col-md-8">
+                        <input type="color" class="le-color-picker" data-target="CtaBackgroundStart" />
+                        <input asp-for="CtaBackgroundStart" class="form-control le-color-hex" data-field="CtaBackgroundStart" />
+                    </div>
+                </div>
+                <div class="form-group row le-color-row">
+                    <div class="col-md-4"><label class="le-field-label">Sfondo CTA (fine)</label></div>
+                    <div class="col-md-8">
+                        <input type="color" class="le-color-picker" data-target="CtaBackgroundEnd" />
+                        <input asp-for="CtaBackgroundEnd" class="form-control le-color-hex" data-field="CtaBackgroundEnd" />
+                    </div>
+                </div>
+                <div class="form-group row le-color-row">
+                    <div class="col-md-4"><label class="le-field-label">Testo CTA</label></div>
+                    <div class="col-md-8">
+                        <input type="color" class="le-color-picker" data-target="CtaTextColor" />
+                        <input asp-for="CtaTextColor" class="form-control le-color-hex" data-field="CtaTextColor" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TIMER SIZE -->
+        <div class="le-settings-section">
+            <div class="section-header" data-toggle="collapse" data-target="#sec-timer">Dimensioni timer</div>
+            <div id="sec-timer" class="section-body collapse">
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Dimensione cifre (px)</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="12" max="64" asp-for="TimerDigitFontSize" class="le-range" data-field="TimerDigitFontSize" />
+                        <span class="le-range-val" data-for="TimerDigitFontSize">@Model.TimerDigitFontSize</span> px
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Dimensione etichette (px)</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="7" max="18" asp-for="TimerLabelFontSize" class="le-range" data-field="TimerLabelFontSize" />
+                        <span class="le-range-val" data-for="TimerLabelFontSize">@Model.TimerLabelFontSize</span> px
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Larghezza minima box</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="30" max="120" asp-for="TimerBoxMinWidth" class="le-range" data-field="TimerBoxMinWidth" />
+                        <span class="le-range-val" data-for="TimerBoxMinWidth">@Model.TimerBoxMinWidth</span> px
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Raggio angoli box</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="0" max="40" asp-for="TimerBoxBorderRadius" class="le-range" data-field="TimerBoxBorderRadius" />
+                        <span class="le-range-val" data-for="TimerBoxBorderRadius">@Model.TimerBoxBorderRadius</span> px
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Padding box</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="0" max="24" asp-for="TimerBoxPadding" class="le-range" data-field="TimerBoxPadding" />
+                        <span class="le-range-val" data-for="TimerBoxPadding">@Model.TimerBoxPadding</span> px
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Spazio tra box</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="0" max="30" asp-for="TimerGap" class="le-range" data-field="TimerGap" />
+                        <span class="le-range-val" data-for="TimerGap">@Model.TimerGap</span> px
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD SIZE -->
+        <div class="le-settings-section">
+            <div class="section-header" data-toggle="collapse" data-target="#sec-card">Dimensioni card</div>
+            <div id="sec-card" class="section-body collapse">
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Raggio angoli card</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="0" max="40" asp-for="CardBorderRadius" class="le-range" data-field="CardBorderRadius" />
+                        <span class="le-range-val" data-for="CardBorderRadius">@Model.CardBorderRadius</span> px
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Padding alto</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="0" max="60" asp-for="CardPaddingTop" class="le-range" data-field="CardPaddingTop" />
+                        <span class="le-range-val" data-for="CardPaddingTop">@Model.CardPaddingTop</span> px
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Padding laterale</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="0" max="60" asp-for="CardPaddingSide" class="le-range" data-field="CardPaddingSide" />
+                        <span class="le-range-val" data-for="CardPaddingSide">@Model.CardPaddingSide</span> px
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Padding basso</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="0" max="60" asp-for="CardPaddingBottom" class="le-range" data-field="CardPaddingBottom" />
+                        <span class="le-range-val" data-for="CardPaddingBottom">@Model.CardPaddingBottom</span> px
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Margine inferiore</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="0" max="60" asp-for="CardMarginBottom" class="le-range" data-field="CardMarginBottom" />
+                        <span class="le-range-val" data-for="CardMarginBottom">@Model.CardMarginBottom</span> px
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Spessore bordo</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="0" max="8" asp-for="CardBorderWidth" class="le-range" data-field="CardBorderWidth" />
+                        <span class="le-range-val" data-for="CardBorderWidth">@Model.CardBorderWidth</span> px
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TIPOGRAFIA -->
+        <div class="le-settings-section">
+            <div class="section-header" data-toggle="collapse" data-target="#sec-tipo">Tipografia</div>
+            <div id="sec-tipo" class="section-body collapse">
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Dimensione titolo</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="12" max="48" asp-for="TitleFontSize" class="le-range" data-field="TitleFontSize" />
+                        <span class="le-range-val" data-for="TitleFontSize">@Model.TitleFontSize</span> px
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Peso font titolo</label></div>
+                    <div class="col-md-8">
+                        <select asp-for="TitleFontWeight" class="form-control le-select-preview" data-field="TitleFontWeight">
+                            <option value="400">Regular (400)</option>
+                            <option value="500">Medium (500)</option>
+                            <option value="600">Semi-bold (600)</option>
+                            <option value="700">Bold (700)</option>
+                            <option value="800">Extra-bold (800)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Dimensione messaggio</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="10" max="28" asp-for="MessageFontSize" class="le-range" data-field="MessageFontSize" />
+                        <span class="le-range-val" data-for="MessageFontSize">@Model.MessageFontSize</span> px
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Dimensione badge</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="8" max="20" asp-for="BadgeFontSize" class="le-range" data-field="BadgeFontSize" />
+                        <span class="le-range-val" data-for="BadgeFontSize">@Model.BadgeFontSize</span> px
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Peso font badge</label></div>
+                    <div class="col-md-8">
+                        <select asp-for="BadgeFontWeight" class="form-control le-select-preview" data-field="BadgeFontWeight">
+                            <option value="400">Regular (400)</option>
+                            <option value="600">Semi-bold (600)</option>
+                            <option value="700">Bold (700)</option>
+                            <option value="800">Extra-bold (800)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Spaziatura lettere badge</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="0" max="8" asp-for="BadgeLetterSpacing" class="le-range" data-field="BadgeLetterSpacing" />
+                        <span class="le-range-val" data-for="BadgeLetterSpacing">@Model.BadgeLetterSpacing</span> px
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Padding verticale badge</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="0" max="16" asp-for="BadgePaddingY" class="le-range" data-field="BadgePaddingY" />
+                        <span class="le-range-val" data-for="BadgePaddingY">@Model.BadgePaddingY</span> px
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Padding orizzontale badge</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="4" max="40" asp-for="BadgePaddingX" class="le-range" data-field="BadgePaddingX" />
+                        <span class="le-range-val" data-for="BadgePaddingX">@Model.BadgePaddingX</span> px
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="le-settings-section">
+            <div class="section-header" data-toggle="collapse" data-target="#sec-cta">Pulsante CTA</div>
+            <div id="sec-cta" class="section-body collapse">
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Dimensione testo CTA</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="10" max="24" asp-for="CtaFontSize" class="le-range" data-field="CtaFontSize" />
+                        <span class="le-range-val" data-for="CtaFontSize">@Model.CtaFontSize</span> px
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Peso font CTA</label></div>
+                    <div class="col-md-8">
+                        <select asp-for="CtaFontWeight" class="form-control le-select-preview" data-field="CtaFontWeight">
+                            <option value="400">Regular (400)</option>
+                            <option value="600">Semi-bold (600)</option>
+                            <option value="700">Bold (700)</option>
+                            <option value="800">Extra-bold (800)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Padding verticale CTA</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="4" max="24" asp-for="CtaPaddingY" class="le-range" data-field="CtaPaddingY" />
+                        <span class="le-range-val" data-for="CtaPaddingY">@Model.CtaPaddingY</span> px
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Padding orizzontale CTA</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="8" max="60" asp-for="CtaPaddingX" class="le-range" data-field="CtaPaddingX" />
+                        <span class="le-range-val" data-for="CtaPaddingX">@Model.CtaPaddingX</span> px
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Raggio angoli CTA</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="0" max="999" asp-for="CtaBorderRadius" class="le-range" data-field="CtaBorderRadius" />
+                        <span class="le-range-val" data-for="CtaBorderRadius">@Model.CtaBorderRadius</span> px
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
-    <div class="col-md-9">
-        <nop-editor asp-for="BackgroundColor" />
-        <span asp-validation-for="BackgroundColor"></span>
+
+    <!-- PREVIEW -->
+    <div class="col-md-5">
+        <div class="le-admin-preview-wrap">
+            <h5>Anteprima live</h5>
+            <div id="le-live-preview" class="le-wrap le-layout-horizontal">
+                <div class="le-card">
+                    <span class="le-badge" id="pv-badge">⚡ Edizione Limitata</span>
+                    <h3 class="le-title" id="pv-title">Nome prodotto esempio</h3>
+                    <div class="le-message" id="pv-message">Prodotto a tempo limitato!</div>
+                    <div class="le-countdown">
+                        <div class="le-time-box"><span>02</span><small id="pv-days">Giorni</small></div>
+                        <div class="le-time-box"><span>14</span><small id="pv-hours">Ore</small></div>
+                        <div class="le-time-box"><span>37</span><small id="pv-mins">Min</small></div>
+                        <div class="le-time-box"><span>09</span><small id="pv-secs">Sec</small></div>
+                    </div>
+                    <a href="javascript:void(0)" class="le-cta" id="pv-cta">Vedi offerta →</a>
+                </div>
+            </div>
+            <p class="text-muted small mt-2 mb-0">Le modifiche aggiornano subito l'anteprima. Salva per applicarle sul sito.</p>
+        </div>
     </div>
 </div>
 
-<div class="form-group row">
-    <div class="col-md-3">
-        <nop-label asp-for="TextColor" />
-    </div>
-    <div class="col-md-9">
-        <nop-editor asp-for="TextColor" />
-        <span asp-validation-for="TextColor"></span>
-    </div>
-</div>
+<script>
+(function () {
+    var preview = document.getElementById('le-live-preview');
+    if (!preview) return;
 
-<div class="form-group row">
-    <div class="col-md-3">
-        <nop-label asp-for="CustomMessage" />
-    </div>
-    <div class="col-md-9">
-        <nop-editor asp-for="CustomMessage" asp-template="MultiLine" />
-        <span asp-validation-for="CustomMessage"></span>
-    </div>
-</div>
+    var cssMap = {
+        AccentColor: '--le-accent',
+        AccentColorLight: '--le-accent-light',
+        CardBackgroundStart: '--le-bg-start',
+        CardBackgroundMid: '--le-bg-mid',
+        CardBackgroundEnd: '--le-bg-end',
+        BorderColor: '--le-border',
+        TitleColor: '--le-title',
+        MessageColor: '--le-message',
+        BadgeTextColor: '--le-badge-text',
+        BadgeBackgroundStart: '--le-badge-bg-start',
+        BadgeBackgroundEnd: '--le-badge-bg-end',
+        TimerDigitColor: '--le-digit',
+        TimerLabelColor: '--le-label',
+        TimerBoxBackground: '--le-box-bg',
+        TimerBoxBorderColor: '--le-box-border',
+        CtaBackgroundStart: '--le-cta-bg-start',
+        CtaBackgroundEnd: '--le-cta-bg-end',
+        CtaTextColor: '--le-cta-text',
+        TimerDigitFontSize: ['--le-digit-size', 'px'],
+        TimerLabelFontSize: ['--le-label-size', 'px'],
+        TimerBoxMinWidth: ['--le-box-min-w', 'px'],
+        TimerBoxBorderRadius: ['--le-box-radius', 'px'],
+        TimerBoxPadding: ['--le-box-pad', 'px'],
+        TimerGap: ['--le-timer-gap', 'px'],
+        CardBorderRadius: ['--le-card-radius', 'px'],
+        CardPaddingTop: ['--le-card-pad-t', 'px'],
+        CardPaddingSide: ['--le-card-pad-s', 'px'],
+        CardPaddingBottom: ['--le-card-pad-b', 'px'],
+        CardMarginBottom: ['--le-card-margin-b', 'px'],
+        CardBorderWidth: ['--le-card-border-w', 'px'],
+        CardTextAlign: '--le-card-align',
+        TitleFontSize: ['--le-title-size', 'px'],
+        TitleFontWeight: '--le-title-weight',
+        MessageFontSize: ['--le-msg-size', 'px'],
+        BadgeFontSize: ['--le-badge-size', 'px'],
+        BadgeFontWeight: '--le-badge-weight',
+        BadgeLetterSpacing: ['--le-badge-ls', 'px'],
+        BadgePaddingY: ['--le-badge-py', 'px'],
+        BadgePaddingX: ['--le-badge-px', 'px'],
+        CtaFontSize: ['--le-cta-size', 'px'],
+        CtaFontWeight: '--le-cta-weight',
+        CtaPaddingY: ['--le-cta-py', 'px'],
+        CtaPaddingX: ['--le-cta-px', 'px'],
+        CtaBorderRadius: ['--le-cta-radius', 'px'],
+        FontFamily: '--le-font'
+    };
 
-<div class="form-group row">
-    <div class="col-md-3">
-        <nop-label asp-for="TimerLayoutId" />
-    </div>
-    <div class="col-md-9">
-        <nop-select asp-for="TimerLayoutId" asp-items="@(new SelectList(new[]
-        {
-            new { Id = 0, Name = "Horizontal" },
-            new { Id = 1, Name = "Boxed" },
-            new { Id = 2, Name = "Minimal" }
-        }, "Id", "Name"))" />
-        <span asp-validation-for="TimerLayoutId"></span>
-    </div>
-</div>
+    function toHex(val) {
+        if (!val) return '#000000';
+        val = ('' + val).trim();
+        if (val.charAt(0) === '#' && (val.length === 7 || val.length === 4)) return val;
+        var m = val.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+        if (m) {
+            return '#' + [m[1], m[2], m[3]].map(function (x) {
+                return ('0' + parseInt(x, 10).toString(16)).slice(-2);
+            }).join('');
+        }
+        return '#000000';
+    }
 
-<div class="form-group row">
-    <div class="col-md-3">
-        <nop-label asp-for="HideProductWhenExpired" />
-    </div>
-    <div class="col-md-9">
-        <nop-editor asp-for="HideProductWhenExpired" />
-        <span asp-validation-for="HideProductWhenExpired"></span>
-    </div>
-</div>
+    function applyCss(field, value) {
+        var map = cssMap[field];
+        if (!map) return;
+        if (Array.isArray(map)) preview.style.setProperty(map[0], value + map[1]);
+        else preview.style.setProperty(map, value);
+    }
+
+    function updateVisibility() {
+        var map = { ShowBadge: 'pv-badge', ShowTitle: 'pv-title', ShowMessage: 'pv-message', ShowCta: 'pv-cta' };
+        Object.keys(map).forEach(function (id) {
+            var el = document.getElementById(id);
+            var target = document.getElementById(map[id]);
+            if (el && target) target.style.display = el.checked ? '' : 'none';
+        });
+    }
+
+    function updateLayout() {
+        var sel = document.getElementById('TimerLayoutId');
+        if (!sel) return;
+        preview.classList.remove('le-layout-horizontal', 'le-layout-boxed', 'le-layout-minimal');
+        var v = parseInt(sel.value, 10);
+        if (v === 1) preview.classList.add('le-layout-boxed');
+        else if (v === 2) preview.classList.add('le-layout-minimal');
+        else preview.classList.add('le-layout-horizontal');
+    }
+
+    function updateTexts() {
+        var map = {
+            BadgeText: 'pv-badge', CustomMessage: 'pv-message', CtaText: 'pv-cta',
+            DaysLabel: 'pv-days', HoursLabel: 'pv-hours', MinutesLabel: 'pv-mins', SecondsLabel: 'pv-secs'
+        };
+        Object.keys(map).forEach(function (id) {
+            var el = document.getElementById(id);
+            var target = document.getElementById(map[id]);
+            if (el && target) target.textContent = el.value || target.textContent;
+        });
+    }
+
+    document.querySelectorAll('.le-color-picker').forEach(function (picker) {
+        var targetName = picker.getAttribute('data-target');
+        var textInput = document.querySelector('[data-field="' + targetName + '"]') || document.getElementById(targetName);
+        if (textInput && textInput.value) {
+            try { picker.value = toHex(textInput.value); } catch (e) {}
+        }
+        picker.addEventListener('input', function () {
+            if (textInput) {
+                textInput.value = picker.value;
+                applyCss(targetName, picker.value);
+            }
+        });
+        if (textInput) {
+            textInput.addEventListener('input', function () {
+                try { picker.value = toHex(textInput.value); } catch (e) {}
+                applyCss(targetName, textInput.value);
+            });
+            applyCss(targetName, textInput.value);
+        }
+    });
+
+    document.querySelectorAll('.le-range').forEach(function (range) {
+        var field = range.getAttribute('data-field');
+        var label = document.querySelector('.le-range-val[data-for="' + field + '"]');
+        range.addEventListener('input', function () {
+            if (label) label.textContent = range.value;
+            applyCss(field, range.value);
+        });
+        applyCss(field, range.value);
+    });
+
+    document.querySelectorAll('.le-select-preview, #TimerLayoutId, #CardTextAlign, #FontFamily').forEach(function (sel) {
+        sel.addEventListener('change', function () {
+            var field = sel.getAttribute('data-field') || sel.id;
+            if (field === 'TimerLayoutId') updateLayout();
+            else applyCss(field, sel.value);
+        });
+        var field = sel.getAttribute('data-field') || sel.id;
+        if (field !== 'TimerLayoutId') applyCss(field, sel.value);
+    });
+
+    ['ShowBadge', 'ShowTitle', 'ShowMessage', 'ShowCta'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.addEventListener('change', updateVisibility);
+    });
+
+    ['BadgeText', 'CustomMessage', 'CtaText', 'DaysLabel', 'HoursLabel', 'MinutesLabel', 'SecondsLabel'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.addEventListener('input', updateTexts);
+    });
+
+    updateVisibility();
+    updateLayout();
+    updateTexts();
+})();
+</script>

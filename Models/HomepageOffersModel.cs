@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Nop.Plugin.Widgets.LimitedEdition.Models
 {
     /// <summary>
-    /// Modello unico usato dalla view LimitedEditionView sia per il timer
-    /// sulla pagina prodotto (un solo elemento, IsProductPage = true) sia
-    /// per l'elenco offerte in homepage (più elementi, IsProductPage = false).
+    /// Modello usato dalla view LimitedEditionView sia per il timer
+    /// sulla pagina prodotto sia per l'elenco offerte in homepage.
+    /// Include lo Style completo per CSS variables.
     /// </summary>
     public class HomepageOffersModel
     {
@@ -14,12 +14,13 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Models
             Offers = new List<PublicInfoModel>();
         }
 
-        /// <summary>
-        /// True quando il widget è mostrato sulla pagina del singolo prodotto:
-        /// in tal caso la view mostra solo il countdown, senza titolo/link/CTA.
-        /// </summary>
         public bool IsProductPage { get; set; }
 
         public IList<PublicInfoModel> Offers { get; set; }
+
+        /// <summary>
+        /// Stile globale del widget (stesso per tutte le card della pagina).
+        /// </summary>
+        public StyleSettingsModel Style { get; set; }
     }
 }

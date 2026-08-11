@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -15,7 +16,6 @@ using Nop.Services.Seo;
 using Nop.Web.Framework.Components;
 using Nop.Web.Framework.Infrastructure;
 using Nop.Web.Models.Catalog;
-using PdfRpt.Core.Contracts;
 
 namespace Nop.Plugin.Widgets.LimitedEdition.Components
 {
@@ -58,54 +58,45 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Components
             var store = await _storeContext.GetCurrentStoreAsync();
             var settings = await _settingService.LoadSettingAsync<LimitedTimeSettings>(store.Id);
 
-            var backgroundColor = string.IsNullOrEmpty(settings.BackgroundColor) ? "#F0E68C" : settings.BackgroundColor;
-            var textColor = string.IsNullOrEmpty(settings.TextColor) ? "#000000" : settings.TextColor;
-            var message = string.IsNullOrEmpty(settings.CustomMessage) ? "Prodotto a tempo limitato!" : settings.CustomMessage;
+            var style = StyleSettingsModel.FromSettings(settings);
+            var message = string.IsNullOrEmpty(settings.CustomMessage)
+                ? "Prodotto a tempo limitato!"
+                : settings.CustomMessage;
 
-          
             var productId = GetProductById(additionalData);
             if (productId > 0)
-                return await InvokeProductPageAsync(productId, message, backgroundColor, textColor);
+                return await InvokeProductPageAsync(productId, message, style);
 
-         
             if (widgetZone == PublicWidgetZones.HomepageTop || widgetZone == PublicWidgetZones.HomepageBeforeProducts)
-                return await InvokeHomepageAsync(message, backgroundColor, textColor);
+                return await InvokeHomepageAsync(message, style);
 
-    
             if (widgetZone == PublicWidgetZones.OrderSummaryContentBefore)
-                return await InvokeCartPopupAsync(message, backgroundColor, textColor);
+                return await InvokeCartPopupAsync(message, style);
 
             return Content("");
         }
 
-        private async Task<IViewComponentResult> InvokeCartPopupAsync(string message, string backgroundColor, string textColor)
+        private async Task<IViewComponentResult> InvokeCartPopupAsync(string message, StyleSettingsModel style)
         {
             var customer = await _workContext.GetCurrentCustomerAsync();
             var cart = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.ShoppingCart);
             var all = await _limitedTimeProductService.GetAllPagedAsync(0, 20);
             var offers = new List<PublicInfoModel>();
-            bool isCustomerEnabled = false;
-
+            var isCustomerEnabled = false;
 
             var customerAction = await _customerActionRepository.Table
                 .FirstOrDefaultAsync(x => x.CustomerId == customer.Id);
             if (customerAction != null)
-            {
                 isCustomerEnabled = customerAction.IsEnabled;
-            }
 
             foreach (var item in all)
             {
-                if (!item.IsActive)
-                    continue;
-                if (item.StartDateUtc > DateTime.UtcNow)
-                    continue;
-                if (item.EndDateUtc < DateTime.UtcNow)
-                    continue;
+                if (!item.IsActive) continue;
+                if (item.StartDateUtc > DateTime.UtcNow) continue;
+                if (item.EndDateUtc < DateTime.UtcNow) continue;
 
                 var product = await _productService.GetProductByIdAsync(item.ProductId);
-                if (product == null || !product.Published)
-                    continue;
+                if (product == null || !product.Published) continue;
 
                 var seName = await _urlRecordService.GetSeNameAsync(product);
                 var productUrl = _webHelper.GetStoreLocation().TrimEnd('/') + "/" + seName;
@@ -115,30 +106,28 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Components
                     ProductId = item.ProductId,
                     EndDateUtc = item.EndDateUtc,
                     CustomMessage = message,
-                    BackgroundColor = backgroundColor,
-                    TextColor = textColor,
                     ProductName = product.Name,
-                    ProductUrl = productUrl
+                    ProductUrl = productUrl,
+                    Style = style
                 });
             }
 
             var model = new HomepageOffersModel
             {
                 IsProductPage = false,
-                Offers = offers
+                Offers = offers,
+                Style = style
             };
-            if ( isCustomerEnabled && cart.Count > 0)
-            {
 
+            if (isCustomerEnabled && cart.Count > 0)
+            {
                 return View("~/Plugins/Widgets.LimitedEdition/Views/Shared/Components/WidgetsLimitedEdition/CartPopup.cshtml", model);
             }
-            else
-            {
-                return Content("");
-            }
+
+            return Content("");
         }
 
-        private async Task<IViewComponentResult> InvokeProductPageAsync(int productId, string message, string backgroundColor, string textColor)
+        private async Task<IViewComponentResult> InvokeProductPageAsync(int productId, string message, StyleSettingsModel style)
         {
             var limited = await _limitedTimeProductService.GetActiveByProductIdAsync(productId);
             if (limited == null)
@@ -146,40 +135,37 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Components
 
             var model = new HomepageOffersModel
             {
-                IsProductPage = true
+                IsProductPage = true,
+                Style = style
             };
             model.Offers.Add(new PublicInfoModel
             {
                 ProductId = productId,
                 EndDateUtc = limited.EndDateUtc,
                 CustomMessage = message,
-                BackgroundColor = backgroundColor,
-                TextColor = textColor
+                Style = style
             });
 
             return View("~/Plugins/Widgets.LimitedEdition/Views/Shared/Components/WidgetsLimitedEdition/LimitedEditionView.cshtml", model);
         }
 
-        private async Task<IViewComponentResult> InvokeHomepageAsync(string message, string backgroundColor, string textColor)
+        private async Task<IViewComponentResult> InvokeHomepageAsync(string message, StyleSettingsModel style)
         {
             var all = await _limitedTimeProductService.GetAllPagedAsync(0, 20);
             var model = new HomepageOffersModel
             {
-                IsProductPage = false
+                IsProductPage = false,
+                Style = style
             };
 
             foreach (var item in all)
             {
-                if (!item.IsActive)
-                    continue;
-                if (item.StartDateUtc > DateTime.UtcNow)
-                    continue;
-                if (item.EndDateUtc < DateTime.UtcNow)
-                    continue;
+                if (!item.IsActive) continue;
+                if (item.StartDateUtc > DateTime.UtcNow) continue;
+                if (item.EndDateUtc < DateTime.UtcNow) continue;
 
                 var product = await _productService.GetProductByIdAsync(item.ProductId);
-                if (product == null || !product.Published)
-                    continue;
+                if (product == null || !product.Published) continue;
 
                 var seName = await _urlRecordService.GetSeNameAsync(product);
                 var productUrl = _webHelper.GetStoreLocation().TrimEnd('/') + "/" + seName;
@@ -189,10 +175,9 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Components
                     ProductId = item.ProductId,
                     EndDateUtc = item.EndDateUtc,
                     CustomMessage = message,
-                    BackgroundColor = backgroundColor,
-                    TextColor = textColor,
                     ProductName = product.Name,
-                    ProductUrl = productUrl
+                    ProductUrl = productUrl,
+                    Style = style
                 });
             }
 
@@ -201,6 +186,7 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Components
 
             return View("~/Plugins/Widgets.LimitedEdition/Views/Shared/Components/WidgetsLimitedEdition/LimitedEditionView.cshtml", model);
         }
+
         private static int GetProductById(object additionalData)
         {
             switch (additionalData)
@@ -212,11 +198,10 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Components
                 case null:
                     return 0;
                 default:
-                    var prop = additionalData.GetType().GetProperty("Id") ?? additionalData.GetType().GetProperty("ProductId");
+                    var prop = additionalData.GetType().GetProperty("Id")
+                               ?? additionalData.GetType().GetProperty("ProductId");
                     return prop?.GetValue(additionalData) is int intVal ? intVal : 0;
             }
         }
-
-
     }
 }

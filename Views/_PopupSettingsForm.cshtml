@@ -1,0 +1,383 @@
+@model ConfigurationModel
+
+<style>
+    .le-popup-preview-frame {
+        background: #333;
+        border-radius: 8px;
+        padding: 20px;
+        min-height: 380px;
+        position: relative;
+        overflow: hidden;
+    }
+    #le-pv-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.72);
+        backdrop-filter: blur(6px);
+        opacity: 0;
+        transition: opacity 0.35s ease;
+        pointer-events: none;
+    }
+    #le-pv-overlay.on { opacity: 1; }
+    #le-pv-modal {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 90%;
+        max-width: 360px;
+        background: linear-gradient(145deg, #0b0b0f, #1a1a22, #0b0b0f);
+        border: 1px solid rgba(212,175,55,0.45);
+        border-radius: 16px;
+        padding: 22px 18px 16px;
+        text-align: center;
+        color: #fff;
+        transform: translate(-50%, -50%) scale(0.9);
+        opacity: 0;
+        transition: opacity 0.35s ease, transform 0.35s ease;
+        font-family: inherit;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    }
+    #le-pv-modal.on {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    #le-pv-modal.anim-fade.on { transform: translate(-50%, -50%); }
+    #le-pv-modal.anim-slideUp { transform: translate(-50%, -30%) scale(1); }
+    #le-pv-modal.anim-slideUp.on { transform: translate(-50%, -50%); }
+    #le-pv-modal.anim-slideDown { transform: translate(-50%, -70%) scale(1); }
+    #le-pv-modal.anim-slideDown.on { transform: translate(-50%, -50%); }
+    .le-pv-badge {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: #1a1a22;
+        background: linear-gradient(90deg, #f4e5a1, #d4af37);
+        padding: 4px 12px;
+        border-radius: 999px;
+        margin-bottom: 10px;
+    }
+    .le-pv-title { margin: 0 0 6px; font-size: 18px; font-weight: 700; }
+    .le-pv-msg { font-size: 13px; color: rgba(255,255,255,0.7); margin: 0 0 14px; }
+    .le-pv-prod {
+        text-align: left;
+        background: rgba(212,175,55,0.08);
+        border: 1px solid rgba(212,175,55,0.3);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 10px;
+        font-size: 13px;
+    }
+    .le-pv-cta {
+        display: inline-block;
+        background: linear-gradient(90deg, #d4af37, #f4e5a1);
+        color: #1a1a22;
+        font-weight: 700;
+        font-size: 12px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        float: right;
+        margin-top: -2px;
+    }
+    .le-pv-continue {
+        display: block;
+        width: 100%;
+        margin-top: 8px;
+        padding: 10px;
+        background: transparent;
+        border: 1px solid rgba(212,175,55,0.4);
+        border-radius: 999px;
+        color: rgba(255,255,255,0.75);
+        font-size: 12px;
+        cursor: pointer;
+    }
+    .le-field-label { font-weight: 600; padding-top: 7px; }
+</style>
+
+<div class="row">
+    <div class="col-md-7">
+        <div class="le-settings-section" style="border:1px solid #e5e5e5;border-radius:6px;margin-bottom:18px;overflow:hidden;">
+            <div class="section-header" style="background:#f8f9fa;padding:10px 16px;font-weight:600;border-bottom:1px solid #e5e5e5;">
+                Popup carrello – comportamento
+            </div>
+            <div class="section-body" style="padding:16px 12px 8px;">
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Abilita popup</label></div>
+                    <div class="col-md-8"><input asp-for="EnableCartPopup" /> <label for="EnableCartPopup">Mostra popup sul carrello</label></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Ritardo apparizione (ms)</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="0" max="5000" step="100" asp-for="PopupShowDelayMs" class="le-popup-range" data-field="PopupShowDelayMs" id="PopupShowDelayMs" />
+                        <span class="le-range-val" data-for="PopupShowDelayMs">@Model.PopupShowDelayMs</span> ms
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Durata animazione (ms)</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="100" max="1500" step="50" asp-for="PopupAnimationDurationMs" class="le-popup-range" data-field="PopupAnimationDurationMs" id="PopupAnimationDurationMs" />
+                        <span class="le-range-val" data-for="PopupAnimationDurationMs">@Model.PopupAnimationDurationMs</span> ms
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Tipo animazione</label></div>
+                    <div class="col-md-8">
+                        <select asp-for="PopupAnimationType" class="form-control" id="PopupAnimationType">
+                            <option value="0">Fade</option>
+                            <option value="1">Scale (zoom)</option>
+                            <option value="2">Slide dal basso</option>
+                            <option value="3">Slide dall'alto</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Opacità overlay (%)</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="0" max="100" asp-for="PopupOverlayOpacity" class="le-popup-range" data-field="PopupOverlayOpacity" id="PopupOverlayOpacity" />
+                        <span class="le-range-val" data-for="PopupOverlayOpacity">@Model.PopupOverlayOpacity</span> %
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Blur overlay (px)</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="0" max="20" asp-for="PopupOverlayBlurPx" class="le-popup-range" data-field="PopupOverlayBlurPx" id="PopupOverlayBlurPx" />
+                        <span class="le-range-val" data-for="PopupOverlayBlurPx">@Model.PopupOverlayBlurPx</span> px
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Larghezza max modal (px)</label></div>
+                    <div class="col-md-8">
+                        <input type="range" min="280" max="600" asp-for="PopupModalMaxWidth" class="le-popup-range" data-field="PopupModalMaxWidth" id="PopupModalMaxWidth" />
+                        <span class="le-range-val" data-for="PopupModalMaxWidth">@Model.PopupModalMaxWidth</span> px
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6"><input asp-for="PopupOncePerSession" /> <label for="PopupOncePerSession">Solo una volta per sessione</label></div>
+                    <div class="col-md-6"><input asp-for="PopupCloseOnOverlayClick" /> <label for="PopupCloseOnOverlayClick">Chiudi cliccando overlay</label></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6"><input asp-for="PopupCloseOnEscape" /> <label for="PopupCloseOnEscape">Chiudi con ESC</label></div>
+                    <div class="col-md-6"><input asp-for="PopupShowBadge" /> <label for="PopupShowBadge">Mostra badge</label></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6"><input asp-for="PopupShowProductList" /> <label for="PopupShowProductList">Mostra lista prodotti</label></div>
+                    <div class="col-md-6"><input asp-for="PopupEnableGlow" /> <label for="PopupEnableGlow">Animazione glow</label></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6"><input asp-for="PopupEnableSheen" /> <label for="PopupEnableSheen">Animazione sheen</label></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="le-settings-section" style="border:1px solid #e5e5e5;border-radius:6px;margin-bottom:18px;overflow:hidden;">
+            <div class="section-header" style="background:#f8f9fa;padding:10px 16px;font-weight:600;border-bottom:1px solid #e5e5e5;">
+                Popup carrello – testi
+            </div>
+            <div class="section-body" style="padding:16px 12px 8px;">
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Titolo popup</label></div>
+                    <div class="col-md-8"><input asp-for="PopupTitle" class="form-control" id="PopupTitle" /></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Sottotitolo</label></div>
+                    <div class="col-md-8"><input asp-for="PopupSubtitle" class="form-control" id="PopupSubtitle" /></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Testo pulsante continua</label></div>
+                    <div class="col-md-8"><input asp-for="PopupContinueText" class="form-control" id="PopupContinueText" /></div>
+                </div>
+                <p class="text-muted small">Colori, font e stile badge/CTA ereditano le impostazioni della sezione visualizzazione sopra.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div style="position:sticky;top:70px;background:#f4f4f5;border:1px solid #ddd;border-radius:8px;padding:16px;">
+            <h5 style="margin:0 0 12px;font-size:14px;text-transform:uppercase;letter-spacing:1px;color:#666;">Anteprima popup</h5>
+            <div class="le-popup-preview-frame">
+                <div id="le-pv-overlay"></div>
+                <div id="le-pv-modal">
+                    <span class="le-pv-badge" id="le-pv-badge">⚡ Edizione Limitata</span>
+                    <h3 class="le-pv-title" id="le-pv-title">Non perderti l'edizione limitata!</h3>
+                    <p class="le-pv-msg" id="le-pv-msg">Questi prodotti esclusivi stanno per scadere</p>
+                    <div id="le-pv-list">
+                        <div class="le-pv-prod">
+                            <span class="le-pv-cta">Vedi</span>
+                            <strong>Prodotto esempio</strong><br/>
+                            <small style="color:#d4af37;">Scade il 15/08/2026 18:00</small>
+                        </div>
+                    </div>
+                    <button type="button" class="le-pv-continue" id="le-pv-continue">Continua lo shopping</button>
+                </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-secondary mt-2" id="le-pv-replay">▶ Rivedi animazione</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    function el(id) { return document.getElementById(id); }
+    function val(id, def) {
+        var e = el(id);
+        if (!e) return def;
+        if (e.type === 'checkbox') return e.checked;
+        return (e.value !== undefined && e.value !== '') ? e.value : def;
+    }
+    function color(id, def) {
+        var e = el(id);
+        return (e && e.value) ? e.value : def;
+    }
+
+    function applyPreview() {
+        var overlay = el('le-pv-overlay');
+        var modal = el('le-pv-modal');
+        if (!overlay || !modal) return;
+
+        var op = parseInt(val('PopupOverlayOpacity', 72), 10) / 100;
+        var blur = parseInt(val('PopupOverlayBlurPx', 6), 10);
+        var maxW = parseInt(val('PopupModalMaxWidth', 420), 10);
+        var dur = parseInt(val('PopupAnimationDurationMs', 350), 10);
+        var anim = parseInt(val('PopupAnimationType', 1), 10);
+
+        // colori dalla sezione visualizzazione
+        var accent = color('AccentColor', '#d4af37');
+        var accentLight = color('AccentColorLight', '#f4e5a1');
+        var bg1 = color('CardBackgroundStart', '#0b0b0f');
+        var bg2 = color('CardBackgroundMid', '#1a1a22');
+        var bg3 = color('CardBackgroundEnd', '#0b0b0f');
+        var border = color('BorderColor', 'rgba(212,175,55,0.45)');
+        var titleC = color('TitleColor', '#ffffff');
+        var msgC = color('MessageColor', 'rgba(255,255,255,0.72)');
+        var badgeText = color('BadgeTextColor', '#1a1a22');
+        var badgeBg1 = color('BadgeBackgroundStart', '#f4e5a1');
+        var badgeBg2 = color('BadgeBackgroundEnd', '#d4af37');
+        var ctaBg1 = color('CtaBackgroundStart', '#d4af37');
+        var ctaBg2 = color('CtaBackgroundEnd', '#f4e5a1');
+        var ctaText = color('CtaTextColor', '#1a1a22');
+        var font = val('FontFamily', 'inherit');
+
+        overlay.style.background = 'rgba(0,0,0,' + op + ')';
+        overlay.style.backdropFilter = 'blur(' + blur + 'px)';
+        overlay.style.webkitBackdropFilter = 'blur(' + blur + 'px)';
+        overlay.style.transition = 'opacity ' + dur + 'ms ease';
+
+        modal.style.maxWidth = Math.min(maxW, 360) + 'px';
+        modal.style.transition = 'opacity ' + dur + 'ms ease, transform ' + dur + 'ms ease';
+        modal.style.background = 'linear-gradient(145deg, ' + bg1 + ' 0%, ' + bg2 + ' 55%, ' + bg3 + ' 100%)';
+        modal.style.borderColor = border;
+        modal.style.fontFamily = font;
+        modal.classList.remove('anim-fade', 'anim-scale', 'anim-slideUp', 'anim-slideDown');
+        if (anim === 0) modal.classList.add('anim-fade');
+        else if (anim === 2) modal.classList.add('anim-slideUp');
+        else if (anim === 3) modal.classList.add('anim-slideDown');
+
+        var title = el('le-pv-title');
+        var msg = el('le-pv-msg');
+        var cont = el('le-pv-continue');
+        var badge = el('le-pv-badge');
+        var list = el('le-pv-list');
+        var cta = modal.querySelector('.le-pv-cta');
+
+        if (title) {
+            title.textContent = val('PopupTitle', title.textContent) || title.textContent;
+            title.style.color = titleC;
+        }
+        if (msg) {
+            msg.textContent = val('PopupSubtitle', msg.textContent) || msg.textContent;
+            msg.style.color = msgC;
+        }
+        if (cont) {
+            cont.textContent = val('PopupContinueText', cont.textContent) || cont.textContent;
+            cont.style.borderColor = accent + '99';
+            cont.style.color = 'rgba(255,255,255,0.75)';
+        }
+        if (badge) {
+            badge.style.display = val('PopupShowBadge', true) ? '' : 'none';
+            badge.style.color = badgeText;
+            badge.style.background = 'linear-gradient(90deg, ' + badgeBg1 + ', ' + badgeBg2 + ')';
+            // testo badge dalla sezione principale se presente
+            var badgeInput = el('BadgeText');
+            if (badgeInput && badgeInput.value) badge.textContent = badgeInput.value;
+        }
+        if (list) list.style.display = val('PopupShowProductList', true) ? '' : 'none';
+        if (cta) {
+            cta.style.background = 'linear-gradient(90deg, ' + ctaBg1 + ', ' + ctaBg2 + ')';
+            cta.style.color = ctaText;
+            var ctaInput = el('CtaText');
+            if (ctaInput && ctaInput.value) cta.textContent = ctaInput.value;
+        }
+
+        // riga prodotto
+        var prod = modal.querySelector('.le-pv-prod');
+        if (prod) {
+            prod.style.background = accent + '14';
+            prod.style.borderColor = accent + '55';
+        }
+        var expiry = modal.querySelector('.le-pv-prod small');
+        if (expiry) expiry.style.color = accent;
+    }
+
+    function playAnim() {
+        var overlay = el('le-pv-overlay');
+        var modal = el('le-pv-modal');
+        if (!overlay || !modal) return;
+        overlay.classList.remove('on');
+        modal.classList.remove('on');
+        applyPreview();
+        var delay = parseInt(val('PopupShowDelayMs', 500), 10);
+        setTimeout(function () {
+            overlay.classList.add('on');
+            modal.classList.add('on');
+        }, Math.min(delay, 800));
+    }
+
+    // slider popup
+    document.querySelectorAll('.le-popup-range').forEach(function (r) {
+        var field = r.getAttribute('data-field');
+        var lab = document.querySelector('.le-range-val[data-for="' + field + '"]');
+        r.addEventListener('input', function () {
+            if (lab) lab.textContent = r.value;
+            applyPreview();
+        });
+    });
+
+    // campi popup
+    ['PopupAnimationType', 'PopupTitle', 'PopupSubtitle', 'PopupContinueText',
+     'PopupShowBadge', 'PopupShowProductList', 'EnableCartPopup'].forEach(function (id) {
+        var e = el(id);
+        if (!e) return;
+        e.addEventListener(e.type === 'checkbox' ? 'change' : (e.tagName === 'SELECT' ? 'change' : 'input'), applyPreview);
+    });
+
+    // colori e testi della sezione principale → aggiornano anche la preview popup
+    var mainColorIds = [
+        'AccentColor', 'AccentColorLight',
+        'CardBackgroundStart', 'CardBackgroundMid', 'CardBackgroundEnd',
+        'BorderColor', 'TitleColor', 'MessageColor',
+        'BadgeTextColor', 'BadgeBackgroundStart', 'BadgeBackgroundEnd',
+        'CtaBackgroundStart', 'CtaBackgroundEnd', 'CtaTextColor',
+        'BadgeText', 'CtaText', 'FontFamily'
+    ];
+    mainColorIds.forEach(function (id) {
+        var e = el(id);
+        if (!e) return;
+        e.addEventListener('input', applyPreview);
+        e.addEventListener('change', applyPreview);
+    });
+
+    // color picker (classe usata nel form principale)
+    document.querySelectorAll('.le-color-picker').forEach(function (picker) {
+        picker.addEventListener('input', function () {
+            setTimeout(applyPreview, 0);
+        });
+    });
+
+    var btn = el('le-pv-replay');
+    if (btn) btn.addEventListener('click', playAnim);
+
+    applyPreview();
+    setTimeout(playAnim, 300);
+})();
+</script>

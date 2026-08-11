@@ -1,22 +1,91 @@
-﻿@model ConfigurationModel
+@model ConfigurationModel
 
 @{
     Layout = "_ConfigurePlugin";
+    // Default per upgrade da settings legacy (campi nuovi a zero/vuoti)
+    var isLegacy = string.IsNullOrEmpty(Model.AccentColor);
+    if (Model.TimerDigitFontSize <= 0) Model.TimerDigitFontSize = 26;
+    if (Model.TimerLabelFontSize <= 0) Model.TimerLabelFontSize = 9;
+    if (Model.TimerBoxMinWidth <= 0) Model.TimerBoxMinWidth = 58;
+    if (Model.TimerBoxBorderRadius < 0) Model.TimerBoxBorderRadius = 10;
+    if (Model.TimerBoxPadding < 0) Model.TimerBoxPadding = 8;
+    if (Model.TimerGap < 0) Model.TimerGap = 10;
+    if (Model.CardBorderRadius < 0) Model.CardBorderRadius = 16;
+    if (Model.CardPaddingTop <= 0) Model.CardPaddingTop = 28;
+    if (Model.CardPaddingSide <= 0) Model.CardPaddingSide = 24;
+    if (Model.CardPaddingBottom <= 0) Model.CardPaddingBottom = 24;
+    if (Model.CardMarginBottom < 0) Model.CardMarginBottom = 22;
+    if (Model.TitleFontSize <= 0) Model.TitleFontSize = 22;
+    if (Model.TitleFontWeight <= 0) Model.TitleFontWeight = 700;
+    if (Model.MessageFontSize <= 0) Model.MessageFontSize = 14;
+    if (Model.BadgeFontSize <= 0) Model.BadgeFontSize = 11;
+    if (Model.BadgeFontWeight <= 0) Model.BadgeFontWeight = 800;
+    if (Model.BadgeLetterSpacing < 0) Model.BadgeLetterSpacing = 2;
+    if (Model.BadgePaddingY < 0) Model.BadgePaddingY = 5;
+    if (Model.BadgePaddingX <= 0) Model.BadgePaddingX = 14;
+    if (Model.CtaFontSize <= 0) Model.CtaFontSize = 14;
+    if (Model.CtaFontWeight <= 0) Model.CtaFontWeight = 700;
+    if (Model.CtaPaddingY <= 0) Model.CtaPaddingY = 11;
+    if (Model.CtaPaddingX <= 0) Model.CtaPaddingX = 28;
+    if (Model.CtaBorderRadius < 0) Model.CtaBorderRadius = 999;
+    if (string.IsNullOrEmpty(Model.CardTextAlign)) Model.CardTextAlign = "center";
+    if (string.IsNullOrEmpty(Model.AccentColor)) Model.AccentColor = "#d4af37";
+    if (string.IsNullOrEmpty(Model.AccentColorLight)) Model.AccentColorLight = "#f4e5a1";
+    if (string.IsNullOrEmpty(Model.CardBackgroundStart)) Model.CardBackgroundStart = "#0b0b0f";
+    if (string.IsNullOrEmpty(Model.CardBackgroundMid)) Model.CardBackgroundMid = "#1a1a22";
+    if (string.IsNullOrEmpty(Model.CardBackgroundEnd)) Model.CardBackgroundEnd = "#0b0b0f";
+    if (string.IsNullOrEmpty(Model.BorderColor)) Model.BorderColor = "rgba(212, 175, 55, 0.45)";
+    if (string.IsNullOrEmpty(Model.TitleColor)) Model.TitleColor = "#ffffff";
+    if (string.IsNullOrEmpty(Model.MessageColor)) Model.MessageColor = "rgba(255, 255, 255, 0.72)";
+    if (string.IsNullOrEmpty(Model.BadgeTextColor)) Model.BadgeTextColor = "#1a1a22";
+    if (string.IsNullOrEmpty(Model.BadgeBackgroundStart)) Model.BadgeBackgroundStart = "#f4e5a1";
+    if (string.IsNullOrEmpty(Model.BadgeBackgroundEnd)) Model.BadgeBackgroundEnd = "#d4af37";
+    if (string.IsNullOrEmpty(Model.TimerDigitColor)) Model.TimerDigitColor = "#f4e5a1";
+    if (string.IsNullOrEmpty(Model.TimerLabelColor)) Model.TimerLabelColor = "rgba(255, 255, 255, 0.45)";
+    if (string.IsNullOrEmpty(Model.TimerBoxBackground)) Model.TimerBoxBackground = "rgba(212, 175, 55, 0.08)";
+    if (string.IsNullOrEmpty(Model.TimerBoxBorderColor)) Model.TimerBoxBorderColor = "rgba(212, 175, 55, 0.35)";
+    if (string.IsNullOrEmpty(Model.CtaBackgroundStart)) Model.CtaBackgroundStart = "#d4af37";
+    if (string.IsNullOrEmpty(Model.CtaBackgroundEnd)) Model.CtaBackgroundEnd = "#f4e5a1";
+    if (string.IsNullOrEmpty(Model.CtaTextColor)) Model.CtaTextColor = "#1a1a22";
+    if (string.IsNullOrEmpty(Model.BadgeText)) Model.BadgeText = "⚡ Edizione Limitata";
+    if (string.IsNullOrEmpty(Model.CtaText)) Model.CtaText = "Vedi offerta →";
+    if (string.IsNullOrEmpty(Model.ExpiredText)) Model.ExpiredText = "Offerta scaduta!";
+    if (string.IsNullOrEmpty(Model.DaysLabel)) Model.DaysLabel = "Giorni";
+    if (string.IsNullOrEmpty(Model.HoursLabel)) Model.HoursLabel = "Ore";
+    if (string.IsNullOrEmpty(Model.MinutesLabel)) Model.MinutesLabel = "Min";
+    if (string.IsNullOrEmpty(Model.SecondsLabel)) Model.SecondsLabel = "Sec";
+    // Su settings legacy i bool sono false: forziamo true al primo accesso
+    if (isLegacy)
+    {
+        Model.ShowBadge = true;
+        Model.ShowTitle = true;
+        Model.ShowMessage = true;
+        Model.ShowCta = true;
+        Model.EnableGlowAnimation = true;
+        Model.EnableSheenAnimation = true;
+    }
 }
 
 <form asp-controller="LimitedTime" asp-action="Configure" method="post">
     <div class="cards-group">
 
-        <!-- Impostazioni -->
+        <!-- Impostazioni visualizzazione + anteprima live -->
         <div class="card card-default">
             <div class="card-header">
-                Impostazioni visualizzazione
+                Impostazioni visualizzazione Limited Edition
             </div>
             <div class="card-body">
                 @await Html.PartialAsync("~/Plugins/Widgets.LimitedEdition/Views/_SettingsForm.cshtml", Model)
             </div>
         </div>
-
+<div class="card card-default">
+    <div class="card-header">
+        Popup carrello (anteprima e impostazioni)
+    </div>
+    <div class="card-body">
+        @await Html.PartialAsync("~/Plugins/Widgets.LimitedEdition/Views/_PopupSettingsForm.cshtml", Model)
+    </div>
+</div>
         <!-- Griglia prodotti -->
         <div class="card card-default">
             <div class="card-header">

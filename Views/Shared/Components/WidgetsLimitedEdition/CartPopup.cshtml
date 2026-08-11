@@ -1,340 +1,195 @@
 ﻿@using System.Linq
 @model Nop.Plugin.Widgets.LimitedEdition.Models.HomepageOffersModel
 
-@if (Model?.Offers == null || !Model.Offers.Any())
-{
-    return;
+@{
+    var s = Model?.Style;
+    if (s == null || !s.EnableCartPopup || Model?.Offers == null || !Model.Offers.Any())
+    {
+        return;
+    }
+
+    var accent = string.IsNullOrWhiteSpace(s.AccentColor) ? "#d4af37" : s.AccentColor;
+    var accentLight = string.IsNullOrWhiteSpace(s.AccentColorLight) ? "#f4e5a1" : s.AccentColorLight;
+    var bgStart = string.IsNullOrWhiteSpace(s.CardBackgroundStart) ? "#0b0b0f" : s.CardBackgroundStart;
+    var bgMid = string.IsNullOrWhiteSpace(s.CardBackgroundMid) ? "#1a1a22" : s.CardBackgroundMid;
+    var bgEnd = string.IsNullOrWhiteSpace(s.CardBackgroundEnd) ? "#0b0b0f" : s.CardBackgroundEnd;
+    var border = string.IsNullOrWhiteSpace(s.BorderColor) ? "rgba(212,175,55,0.45)" : s.BorderColor;
+    var titleColor = string.IsNullOrWhiteSpace(s.TitleColor) ? "#ffffff" : s.TitleColor;
+    var msgColor = string.IsNullOrWhiteSpace(s.MessageColor) ? "rgba(255,255,255,0.72)" : s.MessageColor;
+    var badgeTextColor = string.IsNullOrWhiteSpace(s.BadgeTextColor) ? "#1a1a22" : s.BadgeTextColor;
+    var badgeBg1 = string.IsNullOrWhiteSpace(s.BadgeBackgroundStart) ? "#f4e5a1" : s.BadgeBackgroundStart;
+    var badgeBg2 = string.IsNullOrWhiteSpace(s.BadgeBackgroundEnd) ? "#d4af37" : s.BadgeBackgroundEnd;
+    var ctaBg1 = string.IsNullOrWhiteSpace(s.CtaBackgroundStart) ? "#d4af37" : s.CtaBackgroundStart;
+    var ctaBg2 = string.IsNullOrWhiteSpace(s.CtaBackgroundEnd) ? "#f4e5a1" : s.CtaBackgroundEnd;
+    var ctaText = string.IsNullOrWhiteSpace(s.CtaTextColor) ? "#1a1a22" : s.CtaTextColor;
+    var font = string.IsNullOrWhiteSpace(s.FontFamily) ? "inherit" : s.FontFamily;
+    var radius = s.CardBorderRadius > 0 ? s.CardBorderRadius : 18;
+    var maxW = s.PopupModalMaxWidth > 0 ? s.PopupModalMaxWidth : 420;
+    var delay = s.PopupShowDelayMs >= 0 ? s.PopupShowDelayMs : 500;
+    var dur = s.PopupAnimationDurationMs > 0 ? s.PopupAnimationDurationMs : 350;
+    var overlayOp = (s.PopupOverlayOpacity > 0 ? s.PopupOverlayOpacity : 72) / 100.0;
+    var blur = s.PopupOverlayBlurPx >= 0 ? s.PopupOverlayBlurPx : 6;
+    var anim = s.PopupAnimationType;
+    var badgeLabel = string.IsNullOrWhiteSpace(s.BadgeText) ? "⚡ Edizione Limitata" : s.BadgeText;
+    var ctaLabel = string.IsNullOrWhiteSpace(s.CtaText) ? "Vedi" : s.CtaText;
+    var title = string.IsNullOrWhiteSpace(s.PopupTitle) ? "Non perderti l'edizione limitata!" : s.PopupTitle;
+    var subtitle = string.IsNullOrWhiteSpace(s.PopupSubtitle) ? "Questi prodotti esclusivi stanno per scadere" : s.PopupSubtitle;
+    var continueText = string.IsNullOrWhiteSpace(s.PopupContinueText) ? "Continua lo shopping" : s.PopupContinueText;
 }
 
 <style>
+#le-cart-overlay {
+    position: fixed; inset: 0; z-index: 9998;
+    background: rgba(0,0,0,@overlayOp.ToString(System.Globalization.CultureInfo.InvariantCulture));
+    backdrop-filter: blur(@(blur)px);
+    opacity: 0; visibility: hidden;
+    transition: opacity @(dur)ms ease, visibility @(dur)ms ease;
+}
+#le-cart-overlay.is-visible { opacity: 1; visibility: visible; }
 
-    #le-cart-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.72);
-        backdrop-filter: blur(6px);
-        z-index: 9998;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.35s ease, visibility 0.35s ease;
+#le-cart-modal {
+    position: fixed; top: 50%; left: 50%; z-index: 9999;
+    width: min(@(maxW)px, calc(100% - 28px));
+    background: linear-gradient(145deg, @bgStart 0%, @bgMid 55%, @bgEnd 100%);
+    border: 1px solid @border;
+    border-radius: @(radius)px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.55);
+    opacity: 0; visibility: hidden;
+    font-family: @font;
+    overflow: hidden;
+    transition: opacity @(dur)ms ease, transform @(dur)ms ease, visibility @(dur)ms ease;
+@if (anim == 0)
+{
+    <text>transform: translate(-50%, -50%);</text>
+}
+else if (anim == 2)
+{
+    <text>transform: translate(-50%, -30%);</text>
+}
+else if (anim == 3)
+{
+    <text>transform: translate(-50%, -70%);</text>
+}
+else
+{
+    <text>transform: translate(-50%, -50%) scale(0.92);</text>
+}
+}
+#le-cart-modal.is-visible {
+    opacity: 1; visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+@if (s.PopupEnableGlow)
+{
+    <text>
+    #le-cart-modal { animation: le-pop-glow 3s ease-in-out infinite; }
+    @@keyframes le-pop-glow {
+        0%,100% { box-shadow: 0 20px 50px rgba(0,0,0,0.55), 0 0 20px @(accent)44; }
+        50% { box-shadow: 0 20px 50px rgba(0,0,0,0.55), 0 0 36px @(accent)88; }
     }
-    #le-cart-overlay.is-visible {
-        opacity: 1;
-        visibility: visible;
-    }
+    </text>
+}
 
-    #le-cart-modal {
-        --le-gold: #d4af37;
-        --le-gold-light: #f4e5a1;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -46%) scale(0.94);
-        z-index: 9999;
-        width: min(420px, calc(100% - 28px));
-        background: linear-gradient(145deg, #0b0b0f 0%, #1a1a22 55%, #0b0b0f 100%);
-        border: 1px solid rgba(212, 175, 55, 0.45);
-        border-radius: 18px;
-        box-shadow:
-            0 0 0 1px rgba(212, 175, 55, 0.08),
-            0 20px 50px rgba(0, 0, 0, 0.55),
-            0 0 32px rgba(212, 175, 55, 0.18);
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s ease;
-        overflow: hidden;
-        font-family: inherit;
-        animation: le-modal-glow 3s ease-in-out infinite;
-    }
-    #le-cart-modal.is-visible {
-        opacity: 1;
-        visibility: visible;
-        transform: translate(-50%, -50%) scale(1);
-    }
-
-    @@keyframes le-modal-glow {
-        0%, 100% {
-            box-shadow: 0 0 0 1px rgba(212,175,55,.08), 0 20px 50px rgba(0,0,0,.55), 0 0 22px rgba(212,175,55,.14);
-        }
-        50% {
-            box-shadow: 0 0 0 1px rgba(212,175,55,.2), 0 20px 50px rgba(0,0,0,.55), 0 0 40px rgba(212,175,55,.32);
-        }
-    }
-
-    #le-cart-modal::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(120deg, transparent 30%, rgba(212,175,55,.1) 45%, transparent 65%);
-        background-size: 220% 100%;
-        animation: le-sheen 6s linear infinite;
-        pointer-events: none;
-        z-index: 0;
-    }
-    @@keyframes le-sheen {
-        0%   { background-position: 199% 0; }
-        100% { background-position: -200% 0; }
-    }
-
-    .le-modal-inner {
-        position: relative;
-        z-index: 1;
-        padding: 28px 24px 22px;
-        text-align: center;
-    }
-
-    .le-close {
-        position: absolute;
-        top: 14px;
-        right: 14px;
-        width: 34px;
-        height: 34px;
-        border: 1px solid rgba(212, 175, 55, 0.3);
-        background: rgba(212, 175, 55, 0.08);
-        border-radius: 50%;
-        color: var(--le-gold-light);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background 0.2s, border-color 0.2s;
-        z-index: 2;
-    }
-    .le-close:hover {
-        background: rgba(212, 175, 55, 0.2);
-        border-color: rgba(212, 175, 55, 0.55);
-    }
-    .le-close svg {
-        width: 16px;
-        height: 16px;
-    }
-
-    .le-badge {
-        display: inline-block;
-        font-size: 11px;
-        font-weight: 800;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        color: #1a1a22;
-        background: linear-gradient(90deg, var(--le-gold-light), var(--le-gold));
-        padding: 5px 14px;
-        border-radius: 999px;
-        margin-bottom: 14px;
-        box-shadow: 0 2px 10px rgba(212, 175, 55, 0.5);
-    }
-
-    .le-title {
-        margin: 0 0 6px;
-        font-size: 22px;
-        font-weight: 700;
-        color: #ffffff;
-        letter-spacing: .3px;
-        line-height: 1.25;
-    }
-
-    .le-message {
-        font-size: 14px;
-        color: rgba(255, 255, 255, 0.72);
-        margin: 0 0 20px;
-    }
-
-    .le-products {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        margin-bottom: 20px;
-        text-align: left;
-    }
-
-    .le-product {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 14px;
-        background: rgba(212, 175, 55, 0.06);
-        border: 1px solid rgba(212, 175, 55, 0.28);
-        border-radius: 12px;
-        transition: border-color 0.2s, background 0.2s;
-    }
-    .le-product:hover {
-        border-color: rgba(212, 175, 55, 0.55);
-        background: rgba(212, 175, 55, 0.1);
-    }
-
-    .le-product-icon {
-        flex-shrink: 0;
-        width: 42px;
-        height: 42px;
-        border-radius: 10px;
-        background: rgba(212, 175, 55, 0.12);
-        border: 1px solid rgba(212, 175, 55, 0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--le-gold-light);
-    }
-    .le-product-icon svg {
-        width: 20px;
-        height: 20px;
-    }
-
-    .le-product-info {
-        flex: 1;
-        min-width: 0;
-    }
-    .le-product-name {
-        margin: 0 0 3px;
-        font-size: 14.5px;
-        font-weight: 600;
-        color: #fff;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .le-product-expiry {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        font-size: 12px;
-        color: var(--le-gold);
-        font-weight: 500;
-    }
-    .le-product-expiry svg {
-        width: 12px;
-        height: 12px;
-        opacity: 0.85;
-    }
-
-    .le-product-cta {
-        flex-shrink: 0;
-        display: inline-flex;
-        align-items: center;
-        gap: 3px;
-        padding: 7px 12px;
-        background: linear-gradient(90deg, var(--le-gold), var(--le-gold-light));
-        color: #1a1a22 !important;
-        font-size: 12.5px;
-        font-weight: 700;
-        border-radius: 999px;
-        text-decoration: none !important;
-        transition: transform 0.15s, box-shadow 0.15s;
-        box-shadow: 0 3px 10px rgba(212, 175, 55, 0.3);
-    }
-    .le-product-cta:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 5px 14px rgba(212, 175, 55, 0.45);
-        color: #1a1a22 !important;
-    }
-    .le-product-cta svg {
-        width: 13px;
-        height: 13px;
-    }
-
-    .le-continue {
-        display: block;
-        width: 100%;
-        padding: 12px 20px;
-        background: transparent;
-        border: 1px solid rgba(212, 175, 55, 0.35);
-        border-radius: 999px;
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 13.5px;
-        font-weight: 600;
-        letter-spacing: .3px;
-        cursor: pointer;
-        transition: border-color 0.2s, color 0.2s, background 0.2s;
-    }
-    .le-continue:hover {
-        border-color: rgba(212, 175, 55, 0.6);
-        color: var(--le-gold-light);
-        background: rgba(212, 175, 55, 0.08);
-    }
+.le-modal-inner { position: relative; z-index: 1; padding: 28px 24px 22px; text-align: center; }
+.le-close {
+    position: absolute; top: 12px; right: 12px; width: 32px; height: 32px;
+    border: 1px solid @(accent)55; background: @(accent)18; border-radius: 50%;
+    color: @accentLight; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.le-close svg { width: 14px; height: 14px; }
+.le-badge {
+    display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: 2px;
+    text-transform: uppercase; color: @badgeTextColor;
+    background: linear-gradient(90deg, @badgeBg1, @badgeBg2);
+    padding: 5px 14px; border-radius: 999px; margin-bottom: 12px;
+}
+.le-title { margin: 0 0 6px; font-size: 22px; font-weight: 700; color: @titleColor; }
+.le-message { font-size: 14px; color: @msgColor; margin: 0 0 18px; }
+.le-products { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; text-align: left; }
+.le-product {
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+    background: @(accent)14; border: 1px solid @(accent)44; border-radius: 12px;
+}
+.le-product-name { margin: 0 0 3px; font-size: 14px; font-weight: 600; color: @titleColor; }
+.le-product-expiry { font-size: 12px; color: @accent; }
+.le-product-cta {
+    margin-left: auto; flex-shrink: 0; padding: 7px 12px;
+    background: linear-gradient(90deg, @ctaBg1, @ctaBg2); color: @ctaText !important;
+    font-size: 12px; font-weight: 700; border-radius: 999px; text-decoration: none !important;
+}
+.le-continue {
+    display: block; width: 100%; padding: 12px 20px; background: transparent;
+    border: 1px solid @(accent)55; border-radius: 999px; color: rgba(255,255,255,0.75);
+    font-size: 13px; font-weight: 600; cursor: pointer; font-family: @font;
+}
+.le-continue:hover { color: @accentLight; border-color: @accent; }
 </style>
 
-<!-- Overlay -->
 <div id="le-cart-overlay"></div>
-
-<!-- Modal -->
-<div id="le-cart-modal" role="dialog" aria-modal="true" aria-labelledby="le-cart-title">
+<div id="le-cart-modal" role="dialog" aria-modal="true">
     <button type="button" class="le-close" id="le-cart-close" aria-label="Chiudi">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
         </svg>
     </button>
-
     <div class="le-modal-inner">
-        <span class="le-badge">&#9889; Edizione Limitata</span>
-
-        <h2 class="le-title" id="le-cart-title">Non perderti l'edizione limitata!</h2>
-        <p class="le-message">Questi prodotti esclusivi stanno per scadere</p>
-
-        <div class="le-products">
-            @foreach (var offer in Model.Offers)
-            {
-                <div class="le-product">
-                    <div class="le-product-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                        </svg>
+        @if (s.PopupShowBadge)
+        {
+            <span class="le-badge">@badgeLabel</span>
+        }
+        <h2 class="le-title">@title</h2>
+        <p class="le-message">@subtitle</p>
+        @if (s.PopupShowProductList)
+        {
+            <div class="le-products">
+                @foreach (var offer in Model.Offers)
+                {
+                    <div class="le-product">
+                        <div>
+                            <p class="le-product-name">@offer.ProductName</p>
+                            <span class="le-product-expiry">Scade il @offer.EndDateUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+                        </div>
+                        <a href="@offer.ProductUrl" class="le-product-cta">@ctaLabel</a>
                     </div>
-                    <div class="le-product-info">
-                        <p class="le-product-name">@offer.ProductName</p>
-                        <span class="le-product-expiry">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            Scade il @offer.EndDateUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
-                        </span>
-                    </div>
-                    <a href="@offer.ProductUrl" class="le-product-cta">
-                        Vedi
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </a>
-                </div>
-            }
-        </div>
-
-        <button type="button" class="le-continue" id="le-cart-continue">
-            Continua lo shopping
-        </button>
+                }
+            </div>
+        }
+        <button type="button" class="le-continue" id="le-cart-continue">@continueText</button>
     </div>
 </div>
 
 <script>
-    (function () {
+(function () {
+    var once = @(s.PopupOncePerSession ? "true" : "false");
+    if (once && sessionStorage.getItem('leCartPopupShown')) return;
 
-        if (sessionStorage.getItem('leCartPopupShown')) {
-            return; 
-        }
-        var shown = sessionStorage.getItem('leCartPopupShown');
-        var overlay = document.getElementById('le-cart-overlay');
-        var modal = document.getElementById('le-cart-modal');
-        var closeBtn = document.getElementById('le-cart-close');
-        var continueBtn = document.getElementById('le-cart-continue');
+    var overlay = document.getElementById('le-cart-overlay');
+    var modal = document.getElementById('le-cart-modal');
+    var delay = @delay;
+    var closeOverlay = @(s.PopupCloseOnOverlayClick ? "true" : "false");
+    var closeEsc = @(s.PopupCloseOnEscape ? "true" : "false");
 
-        function openModal() {
-            overlay.classList.add('is-visible');
-            modal.classList.add('is-visible');
-            document.body.style.overflow = 'hidden';
-            sessionStorage.setItem('leCartPopupShown', '1');
-        }
+    function openModal() {
+        overlay.classList.add('is-visible');
+        modal.classList.add('is-visible');
+        document.body.style.overflow = 'hidden';
+        if (once) sessionStorage.setItem('leCartPopupShown', '1');
+    }
+    function closeModal() {
+        overlay.classList.remove('is-visible');
+        modal.classList.remove('is-visible');
+        document.body.style.overflow = '';
+    }
 
-        function closeModal() {
-            overlay.classList.remove('is-visible');
-            modal.classList.remove('is-visible');
-            document.body.style.overflow = '';
-        }
+    setTimeout(openModal, delay);
 
-        setTimeout(openModal, 500);
-
-        closeBtn.addEventListener('click', closeModal);
-        continueBtn.addEventListener('click', closeModal);
-        overlay.addEventListener('click', closeModal);
-
+    document.getElementById('le-cart-close').addEventListener('click', closeModal);
+    document.getElementById('le-cart-continue').addEventListener('click', closeModal);
+    if (closeOverlay) overlay.addEventListener('click', closeModal);
+    if (closeEsc) {
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') closeModal();
         });
-    })();
+    }
+})();
 </script>

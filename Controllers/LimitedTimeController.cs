@@ -38,6 +38,7 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Controllers
             _settingService = settingService;
             _storeContext = storeContext;
             _permissionService = permissionService;
+
         }
 
         #region Configure
@@ -50,17 +51,8 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Controllers
             var store = await _storeContext.GetCurrentStoreAsync();
             var settings = await _settingService.LoadSettingAsync<LimitedTimeSettings>(store.Id);
 
-            var model = new ConfigurationModel
-            {
-                BackgroundColor = settings.BackgroundColor,
-                TextColor = settings.TextColor,
-                CustomMessage = settings.CustomMessage,
-                TimerLayoutId = (int)settings.TimerLayout,
-                HideProductWhenExpired = settings.HideProductWhenExpired,
-                ActiveStoreScopeConfiguration = store.Id,
-                LimitedTimeProductSearchModel = new LimitedTimeProductSearchModel()
-            };
-
+            var model = MapSettingsToModel(settings, store.Id);
+            model.LimitedTimeProductSearchModel = new LimitedTimeProductSearchModel();
             model.LimitedTimeProductSearchModel.SetGridPageSize();
 
             return View("~/Plugins/Widgets.LimitedEdition/Views/Configure.cshtml", model);
@@ -75,16 +67,210 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Controllers
             var store = await _storeContext.GetCurrentStoreAsync();
             var settings = await _settingService.LoadSettingAsync<LimitedTimeSettings>(store.Id);
 
-            settings.BackgroundColor = model.BackgroundColor;
-            settings.TextColor = model.TextColor;
+            // Testi
             settings.CustomMessage = model.CustomMessage;
+            settings.BadgeText = model.BadgeText;
+            settings.CtaText = model.CtaText;
+            settings.ExpiredText = model.ExpiredText;
+            settings.DaysLabel = model.DaysLabel;
+            settings.HoursLabel = model.HoursLabel;
+            settings.MinutesLabel = model.MinutesLabel;
+            settings.SecondsLabel = model.SecondsLabel;
+
+            // Layout
             settings.TimerLayout = (TimerLayoutType)model.TimerLayoutId;
             settings.HideProductWhenExpired = model.HideProductWhenExpired;
+            settings.ShowBadge = model.ShowBadge;
+            settings.ShowTitle = model.ShowTitle;
+            settings.ShowMessage = model.ShowMessage;
+            settings.ShowCta = model.ShowCta;
+            settings.EnableGlowAnimation = model.EnableGlowAnimation;
+            settings.EnableSheenAnimation = model.EnableSheenAnimation;
+            settings.CardTextAlign = model.CardTextAlign;
+
+            // Colori
+            settings.AccentColor = model.AccentColor;
+            settings.AccentColorLight = model.AccentColorLight;
+            settings.CardBackgroundStart = model.CardBackgroundStart;
+            settings.CardBackgroundMid = model.CardBackgroundMid;
+            settings.CardBackgroundEnd = model.CardBackgroundEnd;
+            settings.BorderColor = model.BorderColor;
+            settings.TitleColor = model.TitleColor;
+            settings.MessageColor = model.MessageColor;
+            settings.BadgeTextColor = model.BadgeTextColor;
+            settings.BadgeBackgroundStart = model.BadgeBackgroundStart;
+            settings.BadgeBackgroundEnd = model.BadgeBackgroundEnd;
+            settings.TimerDigitColor = model.TimerDigitColor;
+            settings.TimerLabelColor = model.TimerLabelColor;
+            settings.TimerBoxBackground = model.TimerBoxBackground;
+            settings.TimerBoxBorderColor = model.TimerBoxBorderColor;
+            settings.CtaBackgroundStart = model.CtaBackgroundStart;
+            settings.CtaBackgroundEnd = model.CtaBackgroundEnd;
+            settings.CtaTextColor = model.CtaTextColor;
+
+            // Dimensioni timer
+            settings.TimerDigitFontSize = model.TimerDigitFontSize;
+            settings.TimerLabelFontSize = model.TimerLabelFontSize;
+            settings.TimerBoxMinWidth = model.TimerBoxMinWidth;
+            settings.TimerBoxBorderRadius = model.TimerBoxBorderRadius;
+            settings.TimerBoxPadding = model.TimerBoxPadding;
+            settings.TimerGap = model.TimerGap;
+
+            // Card
+            settings.CardBorderRadius = model.CardBorderRadius;
+            settings.CardPaddingTop = model.CardPaddingTop;
+            settings.CardPaddingSide = model.CardPaddingSide;
+            settings.CardPaddingBottom = model.CardPaddingBottom;
+            settings.CardMarginBottom = model.CardMarginBottom;
+            settings.CardBorderWidth = model.CardBorderWidth;
+
+            // Tipografia
+            settings.TitleFontSize = model.TitleFontSize;
+            settings.TitleFontWeight = model.TitleFontWeight;
+            settings.MessageFontSize = model.MessageFontSize;
+            settings.BadgeFontSize = model.BadgeFontSize;
+            settings.BadgeFontWeight = model.BadgeFontWeight;
+            settings.BadgeLetterSpacing = model.BadgeLetterSpacing;
+            settings.BadgePaddingY = model.BadgePaddingY;
+            settings.BadgePaddingX = model.BadgePaddingX;
+
+            // CTA
+            settings.CtaFontSize = model.CtaFontSize;
+            settings.CtaFontWeight = model.CtaFontWeight;
+            settings.CtaPaddingY = model.CtaPaddingY;
+            settings.CtaPaddingX = model.CtaPaddingX;
+            settings.CtaBorderRadius = model.CtaBorderRadius;
+
+
+            settings.EnableCartPopup = model.EnableCartPopup;
+            settings.PopupShowDelayMs = model.PopupShowDelayMs;
+            settings.PopupOncePerSession = model.PopupOncePerSession;
+            settings.PopupAnimationType = model.PopupAnimationType;
+            settings.PopupAnimationDurationMs = model.PopupAnimationDurationMs;
+            settings.PopupCloseOnOverlayClick = model.PopupCloseOnOverlayClick;
+            settings.PopupCloseOnEscape = model.PopupCloseOnEscape;
+            settings.PopupOverlayOpacity = model.PopupOverlayOpacity;
+            settings.PopupOverlayBlurPx = model.PopupOverlayBlurPx;
+            settings.PopupModalMaxWidth = model.PopupModalMaxWidth;
+            settings.PopupTitle = model.PopupTitle;
+            settings.PopupSubtitle = model.PopupSubtitle;
+            settings.PopupContinueText = model.PopupContinueText;
+            settings.PopupShowBadge = model.PopupShowBadge;
+            settings.PopupShowProductList = model.PopupShowProductList;
+            settings.PopupEnableGlow = model.PopupEnableGlow;
+            settings.PopupEnableSheen = model.PopupEnableSheen;
+
+
+
+
+
+            // Legacy
+            settings.BackgroundColor = model.AccentColor;
+            settings.TextColor = model.TitleColor;
+
+            settings.FontFamily = model.FontFamily;
 
             await _settingService.SaveSettingAsync(settings, store.Id);
             await _settingService.ClearCacheAsync();
 
             return await Configure();
+        }
+
+        private static ConfigurationModel MapSettingsToModel(LimitedTimeSettings settings, int storeId)
+        {
+            return new ConfigurationModel
+            {
+                CustomMessage = settings.CustomMessage,
+                BadgeText = settings.BadgeText,
+                CtaText = settings.CtaText,
+                ExpiredText = settings.ExpiredText,
+                DaysLabel = settings.DaysLabel,
+                HoursLabel = settings.HoursLabel,
+                MinutesLabel = settings.MinutesLabel,
+                SecondsLabel = settings.SecondsLabel,
+
+                TimerLayoutId = (int)settings.TimerLayout,
+                HideProductWhenExpired = settings.HideProductWhenExpired,
+                ShowBadge = settings.ShowBadge,
+                ShowTitle = settings.ShowTitle,
+                ShowMessage = settings.ShowMessage,
+                ShowCta = settings.ShowCta,
+                EnableGlowAnimation = settings.EnableGlowAnimation,
+                EnableSheenAnimation = settings.EnableSheenAnimation,
+                CardTextAlign = settings.CardTextAlign,
+
+                AccentColor = settings.AccentColor,
+                AccentColorLight = settings.AccentColorLight,
+                CardBackgroundStart = settings.CardBackgroundStart,
+                CardBackgroundMid = settings.CardBackgroundMid,
+                CardBackgroundEnd = settings.CardBackgroundEnd,
+                BorderColor = settings.BorderColor,
+                TitleColor = settings.TitleColor,
+                MessageColor = settings.MessageColor,
+                BadgeTextColor = settings.BadgeTextColor,
+                BadgeBackgroundStart = settings.BadgeBackgroundStart,
+                BadgeBackgroundEnd = settings.BadgeBackgroundEnd,
+                TimerDigitColor = settings.TimerDigitColor,
+                TimerLabelColor = settings.TimerLabelColor,
+                TimerBoxBackground = settings.TimerBoxBackground,
+                TimerBoxBorderColor = settings.TimerBoxBorderColor,
+                CtaBackgroundStart = settings.CtaBackgroundStart,
+                CtaBackgroundEnd = settings.CtaBackgroundEnd,
+                CtaTextColor = settings.CtaTextColor,
+
+                TimerDigitFontSize = settings.TimerDigitFontSize,
+                TimerLabelFontSize = settings.TimerLabelFontSize,
+                TimerBoxMinWidth = settings.TimerBoxMinWidth,
+                TimerBoxBorderRadius = settings.TimerBoxBorderRadius,
+                TimerBoxPadding = settings.TimerBoxPadding,
+                TimerGap = settings.TimerGap,
+
+                CardBorderRadius = settings.CardBorderRadius,
+                CardPaddingTop = settings.CardPaddingTop,
+                CardPaddingSide = settings.CardPaddingSide,
+                CardPaddingBottom = settings.CardPaddingBottom,
+                CardMarginBottom = settings.CardMarginBottom,
+                CardBorderWidth = settings.CardBorderWidth,
+
+                TitleFontSize = settings.TitleFontSize,
+                TitleFontWeight = settings.TitleFontWeight,
+                MessageFontSize = settings.MessageFontSize,
+                BadgeFontSize = settings.BadgeFontSize,
+                BadgeFontWeight = settings.BadgeFontWeight,
+                BadgeLetterSpacing = settings.BadgeLetterSpacing,
+                BadgePaddingY = settings.BadgePaddingY,
+                BadgePaddingX = settings.BadgePaddingX,
+
+                CtaFontSize = settings.CtaFontSize,
+                CtaFontWeight = settings.CtaFontWeight,
+                CtaPaddingY = settings.CtaPaddingY,
+                CtaPaddingX = settings.CtaPaddingX,
+                CtaBorderRadius = settings.CtaBorderRadius,
+
+                BackgroundColor = settings.BackgroundColor,
+                TextColor = settings.TextColor,
+                ActiveStoreScopeConfiguration = storeId,
+
+                EnableCartPopup = settings.EnableCartPopup,
+                PopupShowDelayMs = settings.PopupShowDelayMs,
+                PopupOncePerSession = settings.PopupOncePerSession,
+                PopupAnimationType = settings.PopupAnimationType,
+                PopupAnimationDurationMs = settings.PopupAnimationDurationMs,
+                PopupCloseOnOverlayClick = settings.PopupCloseOnOverlayClick,
+                PopupCloseOnEscape = settings.PopupCloseOnEscape,
+                PopupOverlayOpacity = settings.PopupOverlayOpacity,
+                PopupOverlayBlurPx = settings.PopupOverlayBlurPx,
+                PopupModalMaxWidth = settings.PopupModalMaxWidth,
+                PopupTitle = settings.PopupTitle,
+                PopupSubtitle = settings.PopupSubtitle,
+                PopupContinueText = settings.PopupContinueText,
+                PopupShowBadge = settings.PopupShowBadge,
+                PopupShowProductList = settings.PopupShowProductList,
+                PopupEnableGlow = settings.PopupEnableGlow,
+                PopupEnableSheen = settings.PopupEnableSheen,
+
+                FontFamily = settings.FontFamily
+            };
         }
 
         #endregion
@@ -199,17 +385,17 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Controllers
                         label = $"{product.Name} [ID: {product.Id}]",
                         value = product.Name
                     });
-                    return Json(result); 
+                    return Json(result);
                 }
             }
-            
+
             var products = await _productService.SearchProductsAsync(
                 pageIndex: 0,
                 pageSize: 25,
                 keywords: term,
                 searchSku: true,
                 searchManufacturerPartNumber: true,
-                showHidden: true,          
+                showHidden: true,
                 visibleIndividuallyOnly: false
             );
 
