@@ -481,8 +481,3 @@ Presentation/Nop.Web/Plugins/Widgets.LimitedEdition/
 - If needed contact me: nikozarro@gmail.com  or  ilpuntonico@gmail.com
 - Use the GitHub issue tracker for bugs and feature requests
 - When reporting issues, include: nopCommerce version, plugin version (e.g. BETA 0.6), error message, and whether scarcity SQL was applied
-
-
----
-
-**Limited Edition** — countdown and scarcity marketing for nopCommerce.
