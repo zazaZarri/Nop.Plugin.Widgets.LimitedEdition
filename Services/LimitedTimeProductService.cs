@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Nop.Core;
@@ -74,7 +74,6 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Services
         {
             var cacheKey = _staticCacheManager.PrepareKeyForDefaultCache(
                 LimitedTimeDefaults.ProductByProductIdCacheKey, productId);
-
             await _staticCacheManager.RemoveAsync(cacheKey);
         }
     }

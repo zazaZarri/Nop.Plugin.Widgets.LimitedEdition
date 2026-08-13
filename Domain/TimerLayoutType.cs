@@ -1,4 +1,4 @@
-﻿namespace Nop.Plugin.Widgets.LimitedEdition.Domain
+namespace Nop.Plugin.Widgets.LimitedEdition.Domain
 {
     public enum TimerLayoutType
     {

@@ -1,4 +1,4 @@
-﻿using Nop.Core.Caching;
+using Nop.Core.Caching;
 
 namespace Nop.Plugin.Widgets.LimitedEdition
 {

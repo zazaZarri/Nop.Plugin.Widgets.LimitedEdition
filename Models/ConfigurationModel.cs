@@ -4,8 +4,8 @@ using Nop.Web.Framework.Mvc.ModelBinding;
 namespace Nop.Plugin.Widgets.LimitedEdition.Models
 {
     /// <summary>
-    /// Modello completo della pagina di configurazione admin.
-    /// Contiene griglia prodotti + tutte le opzioni di stile/testo con preview live.
+    /// Modello della pagina di configurazione admin.
+    /// I campi di stile si riferiscono sempre al template attualmente selezionato.
     /// </summary>
     public partial record ConfigurationModel : BaseNopModel
     {
@@ -14,9 +14,20 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Models
             LimitedTimeProductSearchModel = new LimitedTimeProductSearchModel();
         }
 
-        public string FontFamily { get; set; }
-
         public LimitedTimeProductSearchModel LimitedTimeProductSearchModel { get; set; }
+
+        // ── Template selezionati ───────────────────────────────────────────
+        [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.SelectedCardTemplate")]
+        public int SelectedCardTemplateId { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.SelectedPopupTemplate")]
+        public int SelectedPopupTemplateId { get; set; }
+
+        /// <summary>JSON completo dei template card (hidden, per round-trip).</summary>
+        public string CardTemplatesJson { get; set; }
+
+        /// <summary>JSON completo dei template popup (hidden, per round-trip).</summary>
+        public string PopupTemplatesJson { get; set; }
 
         // ── Testi ──────────────────────────────────────────────────────────
         [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.CustomMessage")]
@@ -68,6 +79,8 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Models
         [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.EnableSheenAnimation")]
         public bool EnableSheenAnimation { get; set; }
 
+        public string FontFamily { get; set; }
+
         // ── Colori ─────────────────────────────────────────────────────────
         [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.AccentColor")]
         public string AccentColor { get; set; }
@@ -102,7 +115,6 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Models
         [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.BadgeBackgroundEnd")]
         public string BadgeBackgroundEnd { get; set; }
 
-        // ── Timer ──────────────────────────────────────────────────────────
         [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.TimerDigitColor")]
         public string TimerDigitColor { get; set; }
 
@@ -115,6 +127,16 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Models
         [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.TimerBoxBorderColor")]
         public string TimerBoxBorderColor { get; set; }
 
+        [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.CtaBackgroundStart")]
+        public string CtaBackgroundStart { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.CtaBackgroundEnd")]
+        public string CtaBackgroundEnd { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.CtaTextColor")]
+        public string CtaTextColor { get; set; }
+
+        // ── Dimensioni ─────────────────────────────────────────────────────
         [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.TimerDigitFontSize")]
         public int TimerDigitFontSize { get; set; }
 
@@ -133,7 +155,6 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Models
         [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.TimerGap")]
         public int TimerGap { get; set; }
 
-        // ── Card ───────────────────────────────────────────────────────────
         [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.CardBorderRadius")]
         public int CardBorderRadius { get; set; }
 
@@ -155,7 +176,6 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Models
         [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.CardTextAlign")]
         public string CardTextAlign { get; set; }
 
-        // ── Tipografia ─────────────────────────────────────────────────────
         [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.TitleFontSize")]
         public int TitleFontSize { get; set; }
 
@@ -180,16 +200,6 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Models
         [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.BadgePaddingX")]
         public int BadgePaddingX { get; set; }
 
-        // ── CTA ────────────────────────────────────────────────────────────
-        [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.CtaBackgroundStart")]
-        public string CtaBackgroundStart { get; set; }
-
-        [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.CtaBackgroundEnd")]
-        public string CtaBackgroundEnd { get; set; }
-
-        [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.CtaTextColor")]
-        public string CtaTextColor { get; set; }
-
         [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.CtaFontSize")]
         public int CtaFontSize { get; set; }
 
@@ -205,14 +215,12 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Models
         [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.CtaBorderRadius")]
         public int CtaBorderRadius { get; set; }
 
-        // ── Legacy ─────────────────────────────────────────────────────────
-        [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.BackgroundColor")]
+        // Legacy
         public string BackgroundColor { get; set; }
-
-        [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Settings.TextColor")]
         public string TextColor { get; set; }
-
         public int ActiveStoreScopeConfiguration { get; set; }
+
+        // ── Popup comportamento + stile del template selezionato ───────────
         public bool EnableCartPopup { get; set; }
         public int PopupShowDelayMs { get; set; }
         public bool PopupOncePerSession { get; set; }
@@ -230,5 +238,25 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Models
         public bool PopupShowProductList { get; set; }
         public bool PopupEnableGlow { get; set; }
         public bool PopupEnableSheen { get; set; }
+
+        // Feature flags
+        public bool EnableSocialProof { get; set; }
+        public int SocialProofIntervalSeconds { get; set; }
+        public bool SocialProofIncludeSimulated { get; set; }
+        public bool EnableDynamicBadges { get; set; }
+        public int DynamicBadgeUrgentHours { get; set; }
+        public int DynamicBadgeLowStockPercent { get; set; }
+        public bool EnableLastHourSound { get; set; }
+        public bool EnableAbTest { get; set; }
+        public string AbTestTemplateIds { get; set; }
+        public bool EnableExpiryReminders { get; set; }
+        public int ReminderHoursBeforeExpiry { get; set; }
+        public bool CompactOnProductPage { get; set; }
+        public bool PreferStoryOnHomepageTop { get; set; }
+        public bool UseProductImageAsBackground { get; set; }
+        public bool GlobalBlockPurchaseWhenExpired { get; set; }
+        public bool DefaultShowProgressBar { get; set; }
+        public int DefaultProgressBarMode { get; set; }
+        public bool EnableServerCountdown { get; set; }
     }
 }

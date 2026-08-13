@@ -8,6 +8,14 @@
         return;
     }
 
+    var popupTpl = Model.PopupTemplateId switch
+    {
+        1 => "le-pop-minimal",
+        2 => "le-pop-neon",
+        3 => "le-pop-soft",
+        _ => "le-pop-classic"
+    };
+
     var accent = string.IsNullOrWhiteSpace(s.AccentColor) ? "#d4af37" : s.AccentColor;
     var accentLight = string.IsNullOrWhiteSpace(s.AccentColorLight) ? "#f4e5a1" : s.AccentColorLight;
     var bgStart = string.IsNullOrWhiteSpace(s.CardBackgroundStart) ? "#0b0b0f" : s.CardBackgroundStart;
@@ -125,8 +133,8 @@ else
 .le-continue:hover { color: @accentLight; border-color: @accent; }
 </style>
 
-<div id="le-cart-overlay"></div>
-<div id="le-cart-modal" role="dialog" aria-modal="true">
+<div id="le-cart-overlay" class="@popupTpl"></div>
+<div id="le-cart-modal" class="@popupTpl" role="dialog" aria-modal="true">
     <button type="button" class="le-close" id="le-cart-close" aria-label="Chiudi">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>

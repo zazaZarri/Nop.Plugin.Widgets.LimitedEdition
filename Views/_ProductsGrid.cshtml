@@ -39,6 +39,16 @@
                 Width = "180",
                 Render = new RenderDate()
             },
+            new ColumnProperty(nameof(LimitedTimeProductModel.RemainingQuantity))
+            {
+                Title = "Rimanenti",
+                Width = "90"
+            },
+            new ColumnProperty(nameof(LimitedTimeProductModel.SoldCount))
+            {
+                Title = "Venduti",
+                Width = "80"
+            },
             new ColumnProperty(nameof(LimitedTimeProductModel.IsActive))
             {
                 Title = "Attivo",
@@ -101,6 +111,31 @@
                 </div>
 
                 <div class="form-group row">
+                    <div class="col-md-3"><label>Qty iniziale</label></div>
+                    <div class="col-md-3"><input type="number" id="ltp-initial-qty" class="form-control" min="0" value="0" /></div>
+                    <div class="col-md-3"><label>Rimanenti</label></div>
+                    <div class="col-md-3"><input type="number" id="ltp-remaining-qty" class="form-control" min="0" value="0" /></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-3"><label>Sconto %</label></div>
+                    <div class="col-md-3"><input type="number" id="ltp-discount" class="form-control" min="0" max="100" step="0.1" value="0" /></div>
+                    <div class="col-md-6">
+                        <label><input type="checkbox" id="ltp-show-stock" /> Mostra pezzi rimasti</label><br/>
+                        <label><input type="checkbox" id="ltp-show-sold" /> Mostra venduti</label><br/>
+                        <label><input type="checkbox" id="ltp-show-progress" checked /> Progress bar</label><br/>
+                        <label><input type="checkbox" id="ltp-block-expired" checked /> Blocca acquisto se scaduto/esausto</label>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-3"><label>Progress mode</label></div>
+                    <div class="col-md-9">
+                        <select id="ltp-progress-mode" class="form-control">
+                            <option value="0">Tempo</option>
+                            <option value="1">Stock venduto</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row">
                     <div class="col-md-3">
                         <label>Attivo</label>
                     </div>
@@ -129,6 +164,14 @@
             $('#ltp-start-date').val('');
             $('#ltp-end-date').val('');
             $('#ltp-is-active').prop('checked', true);
+            $('#ltp-initial-qty').val('0');
+            $('#ltp-remaining-qty').val('0');
+            $('#ltp-discount').val('0');
+            $('#ltp-show-stock').prop('checked', false);
+            $('#ltp-show-sold').prop('checked', false);
+            $('#ltp-show-progress').prop('checked', true);
+            $('#ltp-block-expired').prop('checked', true);
+            $('#ltp-progress-mode').val('0');
         });
 
         $('#ltp-product-search').autocomplete({
@@ -179,7 +222,15 @@
                 ProductId: productId,
                 StartDateUtc: $('#ltp-start-date').val(),
                 EndDateUtc: $('#ltp-end-date').val(),
-                IsActive: $('#ltp-is-active').is(':checked')
+                IsActive: $('#ltp-is-active').is(':checked'),
+                InitialQuantity: parseInt($('#ltp-initial-qty').val() || '0', 10),
+                RemainingQuantity: parseInt($('#ltp-remaining-qty').val() || '0', 10),
+                ShowRemainingStock: $('#ltp-show-stock').is(':checked'),
+                ShowSoldCount: $('#ltp-show-sold').is(':checked'),
+                ShowProgressBar: $('#ltp-show-progress').is(':checked'),
+                ProgressBarMode: parseInt($('#ltp-progress-mode').val() || '0', 10),
+                DiscountPercentage: parseFloat($('#ltp-discount').val() || '0'),
+                BlockPurchaseWhenExpired: $('#ltp-block-expired').is(':checked')
             };
 
             $.ajax({

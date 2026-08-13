@@ -2,8 +2,6 @@
 
 @{
     Layout = "_ConfigurePlugin";
-    // Default per upgrade da settings legacy (campi nuovi a zero/vuoti)
-    var isLegacy = string.IsNullOrEmpty(Model.AccentColor);
     if (Model.TimerDigitFontSize <= 0) Model.TimerDigitFontSize = 26;
     if (Model.TimerLabelFontSize <= 0) Model.TimerLabelFontSize = 9;
     if (Model.TimerBoxMinWidth <= 0) Model.TimerBoxMinWidth = 58;
@@ -54,22 +52,12 @@
     if (string.IsNullOrEmpty(Model.HoursLabel)) Model.HoursLabel = "Ore";
     if (string.IsNullOrEmpty(Model.MinutesLabel)) Model.MinutesLabel = "Min";
     if (string.IsNullOrEmpty(Model.SecondsLabel)) Model.SecondsLabel = "Sec";
-    // Su settings legacy i bool sono false: forziamo true al primo accesso
-    if (isLegacy)
-    {
-        Model.ShowBadge = true;
-        Model.ShowTitle = true;
-        Model.ShowMessage = true;
-        Model.ShowCta = true;
-        Model.EnableGlowAnimation = true;
-        Model.EnableSheenAnimation = true;
-    }
 }
 
-<form asp-controller="LimitedTime" asp-action="Configure" method="post">
+<form id="le-configure-form" method="post" action="javascript:void(0);">
+    @Html.AntiForgeryToken()
     <div class="cards-group">
 
-        <!-- Impostazioni visualizzazione + anteprima live -->
         <div class="card card-default">
             <div class="card-header">
                 Impostazioni visualizzazione Limited Edition
@@ -78,30 +66,136 @@
                 @await Html.PartialAsync("~/Plugins/Widgets.LimitedEdition/Views/_SettingsForm.cshtml", Model)
             </div>
         </div>
-<div class="card card-default">
-    <div class="card-header">
-        Popup carrello (anteprima e impostazioni)
-    </div>
-    <div class="card-body">
-        @await Html.PartialAsync("~/Plugins/Widgets.LimitedEdition/Views/_PopupSettingsForm.cshtml", Model)
-    </div>
-</div>
-        <!-- Griglia prodotti -->
+
         <div class="card card-default">
             <div class="card-header">
-                Prodotti a tempo limitato
+                Popup carrello (anteprima e impostazioni)
             </div>
-            @await Html.PartialAsync("~/Plugins/Widgets.LimitedEdition/Views/_ProductsGrid.cshtml", Model.LimitedTimeProductSearchModel)
+            <div class="card-body">
+                @await Html.PartialAsync("~/Plugins/Widgets.LimitedEdition/Views/_PopupSettingsForm.cshtml", Model)
+            </div>
         </div>
 
     </div>
 
     <div class="form-group row mt-3">
         <div class="col-md-9 offset-md-3">
-            <button type="submit" name="save" class="btn btn-primary">
+            <button type="button" id="le-save-btn" class="btn btn-primary">
                 <i class="far fa-save"></i>
                 @T("Admin.Common.Save")
             </button>
+            <span id="le-save-status" class="ml-3" style="font-weight:600;"></span>
         </div>
     </div>
 </form>
+
+<div class="cards-group mt-3">
+    <div class="card card-default">
+        <div class="card-header">
+            Prodotti a tempo limitato
+        </div>
+        @await Html.PartialAsync("~/Plugins/Widgets.LimitedEdition/Views/_ProductsGrid.cshtml", Model.LimitedTimeProductSearchModel)
+    </div>
+</div>
+
+<script>
+(function () {
+    var btn = document.getElementById('le-save-btn');
+    var status = document.getElementById('le-save-status');
+    var form = document.getElementById('le-configure-form');
+    if (!btn || !form) return;
+
+    function token() {
+        var el = form.querySelector('input[name="__RequestVerificationToken"]');
+        return el ? el.value : '';
+    }
+
+    btn.addEventListener('click', function () {
+        btn.disabled = true;
+        if (status) {
+            status.style.color = '#666';
+            status.textContent = 'Salvataggio in corso...';
+        }
+
+        var fd = new FormData();
+        var tokenEl = form.querySelector('input[name="__RequestVerificationToken"]');
+        if (tokenEl) fd.append('__RequestVerificationToken', tokenEl.value);
+
+        // tutti gli input/select/textarea del form
+        form.querySelectorAll('input, select, textarea').forEach(function (el) {
+            if (!el.name || el.name === '__RequestVerificationToken') return;
+            var type = (el.type || '').toLowerCase();
+            if (type === 'checkbox') {
+                fd.append(el.name, el.checked ? 'true' : 'false');
+            } else if (type === 'radio') {
+                if (el.checked) fd.append(el.name, el.value);
+            } else if (type === 'file') {
+                // skip
+            } else {
+                fd.append(el.name, el.value != null ? el.value : '');
+            }
+        });
+
+        // sincronizza hidden template id dai select se presenti
+        var cardSel = document.getElementById('CardTemplateSelect');
+        var cardHid = document.getElementById('SelectedCardTemplateId');
+        if (cardSel && cardHid) {
+            cardHid.value = cardSel.value;
+            fd.set('SelectedCardTemplateId', cardSel.value);
+        }
+        var popSel = document.getElementById('PopupTemplateSelect');
+        var popHid = document.getElementById('SelectedPopupTemplateId');
+        if (popSel && popHid) {
+            popHid.value = popSel.value;
+            fd.set('SelectedPopupTemplateId', popSel.value);
+        }
+
+        fetch('@Url.Action("SaveSettingsAjax", "LimitedTime", new { area = "Admin" })', {
+            method: 'POST',
+            body: fd,
+            headers: {
+                'RequestVerificationToken': tokenEl ? tokenEl.value : ''
+            },
+            credentials: 'same-origin'
+        })
+        .then(function (r) {
+            return r.text().then(function (text) {
+                var data;
+                try { data = JSON.parse(text); }
+                catch (e) {
+                    throw new Error('Risposta non JSON (HTTP ' + r.status + '): ' + text.substring(0, 300));
+                }
+                if (!r.ok && !(data && data.success)) throw new Error((data && data.message) || ('HTTP ' + r.status));
+                return data;
+            });
+        })
+        .then(function (data) {
+            if (data && data.success) {
+                if (status) {
+                    status.style.color = '#0a0';
+                    status.textContent = '✓ Tutte le impostazioni salvate';
+                }
+                alert('Tutte le impostazioni salvate correttamente.\n\nBadge: ' + (data.badgeText || '') + '\nAccent: ' + (data.accentColor || '') + '\nCTA: ' + (data.ctaText || ''));
+            } else {
+                var msg = (data && data.message) ? data.message : 'Salvataggio fallito';
+                if (status) {
+                    status.style.color = '#c00';
+                    status.textContent = '✗ ' + msg;
+                }
+                alert('Errore salvataggio: ' + msg);
+            }
+        })
+        .catch(function (err) {
+            if (status) {
+                status.style.color = '#c00';
+                status.textContent = '✗ ' + err.message;
+            }
+            alert('Errore salvataggio: ' + err.message);
+        })
+        .finally(function () {
+            btn.disabled = false;
+        });
+    });
+
+})();
+</script>

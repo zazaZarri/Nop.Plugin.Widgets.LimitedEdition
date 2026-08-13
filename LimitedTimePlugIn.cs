@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Nop.Core;
 using Nop.Plugin.Widgets.LimitedEdition.Domain;
+using Nop.Plugin.Widgets.LimitedEdition.Models;
 using Nop.Services.Cms;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
@@ -52,8 +53,16 @@ namespace Nop.Plugin.Widgets.LimitedEdition
 
         public override async Task InstallAsync()
         {
+            var cardDict = StyleBag.EnsureCardTemplates(null);
+            var popupDict = StyleBag.EnsurePopupTemplates(null);
+
             await _settingService.SaveSettingAsync(new LimitedTimeSettings
             {
+                SelectedCardTemplateId = 0,
+                SelectedPopupTemplateId = 0,
+                CardTemplatesJson = StyleBag.SerializeDict(cardDict),
+                PopupTemplatesJson = StyleBag.SerializeDict(popupDict),
+
                 CustomMessage = "Prodotto a tempo limitato! 500 copie rimaste",
                 BadgeText = "⚡ Edizione Limitata",
                 CtaText = "Vedi offerta →",
@@ -73,6 +82,30 @@ namespace Nop.Plugin.Widgets.LimitedEdition
                 EnableSheenAnimation = true,
                 CardTextAlign = "center",
 
+                EnableCartPopup = true,
+                EnableSocialProof = true,
+                SocialProofIntervalSeconds = 12,
+                SocialProofIncludeSimulated = true,
+                EnableDynamicBadges = true,
+                DynamicBadgeUrgentHours = 24,
+                DynamicBadgeLowStockPercent = 20,
+                EnableLastHourSound = false,
+                EnableAbTest = false,
+                EnableExpiryReminders = false,
+                ReminderHoursBeforeExpiry = 6,
+                CompactOnProductPage = true,
+                PreferStoryOnHomepageTop = false,
+                UseProductImageAsBackground = false,
+                GlobalBlockPurchaseWhenExpired = true,
+                DefaultShowProgressBar = true,
+                DefaultProgressBarMode = 0,
+                EnableServerCountdown = true,
+                PopupShowDelayMs = 500,
+                PopupOncePerSession = true,
+                PopupCloseOnOverlayClick = true,
+                PopupCloseOnEscape = true,
+
+                // Legacy defaults (Classic)
                 AccentColor = "#d4af37",
                 AccentColorLight = "#f4e5a1",
                 CardBackgroundStart = "#0b0b0f",
@@ -91,21 +124,18 @@ namespace Nop.Plugin.Widgets.LimitedEdition
                 CtaBackgroundStart = "#d4af37",
                 CtaBackgroundEnd = "#f4e5a1",
                 CtaTextColor = "#1a1a22",
-
                 TimerDigitFontSize = 26,
                 TimerLabelFontSize = 9,
                 TimerBoxMinWidth = 58,
                 TimerBoxBorderRadius = 10,
                 TimerBoxPadding = 8,
                 TimerGap = 10,
-
                 CardBorderRadius = 16,
                 CardPaddingTop = 28,
                 CardPaddingSide = 24,
                 CardPaddingBottom = 24,
                 CardMarginBottom = 22,
                 CardBorderWidth = 1,
-
                 TitleFontSize = 22,
                 TitleFontWeight = 700,
                 MessageFontSize = 14,
@@ -114,18 +144,16 @@ namespace Nop.Plugin.Widgets.LimitedEdition
                 BadgeLetterSpacing = 2,
                 BadgePaddingY = 5,
                 BadgePaddingX = 14,
-
                 CtaFontSize = 14,
                 CtaFontWeight = 700,
                 CtaPaddingY = 11,
                 CtaPaddingX = 28,
                 CtaBorderRadius = 999,
-
                 BackgroundColor = "#d4af37",
-                TextColor = "#ffffff"
+                TextColor = "#ffffff",
+                FontFamily = "inherit"
             });
 
-            // Localizzazione: una risorsa alla volta (compatibile con la tua versione di nopCommerce)
             var resources = new Dictionary<string, string>
             {
                 ["Plugins.Widgets.LimitedEdition.Settings.CustomMessage"] = "Messaggio personalizzato",
@@ -189,7 +217,9 @@ namespace Nop.Plugin.Widgets.LimitedEdition
                 ["Plugins.Widgets.LimitedEdition.Settings.CtaPaddingX"] = "Padding orizzontale CTA (px)",
                 ["Plugins.Widgets.LimitedEdition.Settings.CtaBorderRadius"] = "Raggio angoli CTA (px)",
                 ["Plugins.Widgets.LimitedEdition.Settings.BackgroundColor"] = "Colore sfondo (legacy)",
-                ["Plugins.Widgets.LimitedEdition.Settings.TextColor"] = "Colore testo (legacy)"
+                ["Plugins.Widgets.LimitedEdition.Settings.TextColor"] = "Colore testo (legacy)",
+                ["Plugins.Widgets.LimitedEdition.Settings.SelectedCardTemplate"] = "Template card",
+                ["Plugins.Widgets.LimitedEdition.Settings.SelectedPopupTemplate"] = "Template popup"
             };
 
             foreach (var resource in resources)

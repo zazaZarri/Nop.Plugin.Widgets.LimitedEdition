@@ -1,11 +1,11 @@
-﻿{
+{
   "Group": "Widgets",
-  "FriendlyName": "Limited Edition Products",
+  "FriendlyName": "Limited Edition",
   "SystemName": "Widgets.LimitedEdition",
-  "Version": "1.00",
-  "SupportedVersions": [ "4.90" ],
-  "Author": "Il Tuo Nome",
+  "Version": "1.2.0",
+  "SupportedVersions": [ "4.70", "4.80", "4.90" ],
+  "Author": "Limited Edition",
   "DisplayOrder": 1,
   "FileName": "Nop.Plugin.Widgets.LimitedEdition.dll",
-  "Description": "Mostra un timer di conto alla rovescia sui prodotti impostati come 'a tempo limitato'."
+  "Description": "Widget per prodotti a tempo limitato con countdown, template multipli per card e popup carrello, personalizzazione completa per ogni template."
 }

@@ -153,7 +153,80 @@
         border-radius: var(--le-cta-radius);
         text-decoration: none;
     }
+
+    #le-live-preview .le-cta {
+        display: inline-block;
+        background: linear-gradient(90deg, var(--le-cta-bg-start), var(--le-cta-bg-end));
+        color: var(--le-cta-text);
+        font-weight: var(--le-cta-weight);
+        font-size: var(--le-cta-size);
+        padding: var(--le-cta-py) var(--le-cta-px);
+        border-radius: var(--le-cta-radius);
+        text-decoration: none;
+    }
+    #le-live-preview .le-scarcity {
+        margin: 8px 0 12px;
+        font-size: 13px;
+        color: var(--le-message);
+    }
+    #le-live-preview .le-scarcity strong { color: var(--le-accent); }
+    #le-live-preview .le-discount {
+        display: inline-block;
+        margin-left: 6px;
+        background: var(--le-accent);
+        color: #111;
+        font-weight: 800;
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 6px;
+        vertical-align: middle;
+    }
+    #le-live-preview .le-progress {
+        height: 6px;
+        background: rgba(128,128,128,.2);
+        border-radius: 99px;
+        overflow: hidden;
+        margin: 0 0 14px;
+    }
+    #le-live-preview .le-progress > i {
+        display: block;
+        height: 100%;
+        width: 45%;
+        background: linear-gradient(90deg, var(--le-accent), var(--le-accent-light));
+        border-radius: 99px;
+    }
+    #le-live-preview .le-badge.le-dyn {
+        animation: le-admin-pulse 1.6s ease-in-out infinite;
+    }
+    @@keyframes le-admin-pulse {
+        0%,100% { transform: scale(1); }
+        50% { transform: scale(1.04); }
+    }
+    #le-live-preview.le-tpl-story .le-card {
+        min-height: 260px;
+        background-size: cover;
+        background-position: center;
+        background-image: linear-gradient(180deg, rgba(0,0,0,.4), rgba(0,0,0,.75)),
+            url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect fill="%23333" width="400" height="300"/><text x="50%25" y="50%25" fill="%23999" text-anchor="middle" font-size="18">Product image</text></svg>');
+    }
+    #le-live-preview.le-tpl-minimal .le-card { box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    #le-live-preview.le-tpl-neon .le-time-box span {
+        text-shadow: 0 0 12px var(--le-accent);
+    }
+    #le-live-preview.le-tpl-soft .le-card { box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+    .le-preview-sample {
+        margin-top: 10px;
+        padding: 10px;
+        background: #fff;
+        border: 1px dashed #ccc;
+        border-radius: 6px;
+        font-size: 12px;
+    }
+    .le-preview-sample label { font-weight: 600; margin-right: 6px; }
+    .le-preview-sample input[type="number"] { width: 64px; display: inline-block; margin-right: 8px; }
+
     .le-settings-section {
+
         border: 1px solid #e5e5e5;
         border-radius: 6px;
         margin-bottom: 18px;
@@ -202,8 +275,103 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Inter:wght@400;600;700;800&family=Lato:wght@400;700;900&family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;600;700;800&family=Oswald:wght@400;600;700&family=Playfair+Display:wght@400;700&family=Poppins:wght@400;600;700;800&family=Raleway:wght@400;600;700;800&family=Roboto:wght@400;500;700;900&family=Rubik:wght@400;600;700&family=Source+Sans+3:wght@400;600;700&family=Space+Grotesk:wght@400;600;700&family=Work+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
 
+<input type="hidden" asp-for="SelectedCardTemplateId" id="SelectedCardTemplateId" />
+
 <div class="row">
     <div class="col-md-7">
+
+        <!-- TEMPLATE CARD -->
+        <div class="le-settings-section" style="border-color:#d4af37;">
+            <div class="section-header" style="background:linear-gradient(90deg,#f8f9fa,#fff8e7);">Template card</div>
+            <div class="section-body" style="padding:16px 12px;">
+                <p class="text-muted small mb-2">Ogni template ha stile e personalizzazioni <strong>indipendenti</strong>. Cambiando template carichi le sue impostazioni; salvando aggiorni solo quello selezionato.</p>
+                <div class="form-group row mb-0">
+                    <div class="col-md-4"><label class="le-field-label">Template attivo</label></div>
+                    <div class="col-md-8">
+                        <select id="CardTemplateSelect" class="form-control">
+                            <option value="0">Classic — Gold luxury dark</option>
+                            <option value="1">Minimal — Chiaro e pulito</option>
+                            <option value="2">Neon — Cyber glow</option>
+                            <option value="3">Soft — Pastel elegante</option>
+                            <option value="4">Story — Full-bleed hero</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- FEATURES -->
+        <div class="le-settings-section">
+            <div class="section-header" data-toggle="collapse" data-target="#sec-features">Funzionalità avanzate</div>
+            <div id="sec-features" class="section-body collapse show">
+                <div class="form-group row">
+                    <div class="col-md-6"><input asp-for="EnableSocialProof" /> <label for="EnableSocialProof">Social proof (toast acquisti)</label></div>
+                    <div class="col-md-6"><input asp-for="SocialProofIncludeSimulated" /> <label for="SocialProofIncludeSimulated">Includi eventi simulati</label></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Intervallo toast (sec)</label></div>
+                    <div class="col-md-8"><input asp-for="SocialProofIntervalSeconds" class="form-control" type="number" min="5" max="120" /></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6"><input asp-for="EnableDynamicBadges" /> <label for="EnableDynamicBadges">Badge dinamici</label></div>
+                    <div class="col-md-6"><input asp-for="EnableLastHourSound" /> <label for="EnableLastHourSound">Suono ultima ora</label></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Ore badge urgente</label></div>
+                    <div class="col-md-2"><input asp-for="DynamicBadgeUrgentHours" class="form-control" type="number" /></div>
+                    <div class="col-md-4"><label class="le-field-label">% stock basso</label></div>
+                    <div class="col-md-2"><input asp-for="DynamicBadgeLowStockPercent" class="form-control" type="number" /></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6"><input asp-for="EnableAbTest" /> <label for="EnableAbTest">A/B test template</label></div>
+                    <div class="col-md-6"><input asp-for="EnableServerCountdown" /> <label for="EnableServerCountdown">Countdown server-side</label></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Template A/B (csv id)</label></div>
+                    <div class="col-md-8"><input asp-for="AbTestTemplateIds" class="form-control" placeholder="0,2,4" /></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6"><input asp-for="EnableExpiryReminders" /> <label for="EnableExpiryReminders">Reminder email scadenza</label></div>
+                    <div class="col-md-3"><label class="le-field-label">Ore prima</label></div>
+                    <div class="col-md-3"><input asp-for="ReminderHoursBeforeExpiry" class="form-control" type="number" /></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6"><input asp-for="CompactOnProductPage" /> <label for="CompactOnProductPage">Layout compatto product page</label></div>
+                    <div class="col-md-6"><input asp-for="PreferStoryOnHomepageTop" /> <label for="PreferStoryOnHomepageTop">Forza Story in homepage top</label></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6"><input asp-for="UseProductImageAsBackground" /> <label for="UseProductImageAsBackground">Usa immagine prodotto come sfondo card</label></div>
+                    <div class="col-md-6"><span class="text-muted small">Se attivo, la foto prodotto diventa background (ideale con template Story).</span></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6"><input asp-for="GlobalBlockPurchaseWhenExpired" /> <label for="GlobalBlockPurchaseWhenExpired">Blocca acquisto se scaduto</label></div>
+                    <div class="col-md-6"><input asp-for="DefaultShowProgressBar" /> <label for="DefaultShowProgressBar">Progress bar default</label></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4"><label class="le-field-label">Progress mode default</label></div>
+                    <div class="col-md-8">
+                        <select asp-for="DefaultProgressBarMode" class="form-control">
+                            <option value="0">Tempo</option>
+                            <option value="1">Stock</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-12">
+                        <a class="btn btn-sm btn-secondary" href="@Url.Action("ExportTemplates", "LimitedTime", new { area = "Admin" })">Esporta template JSON</a>
+                        <button type="button" class="btn btn-sm btn-secondary" id="le-import-btn">Importa template JSON</button>
+                        <input type="file" id="le-import-file" accept="application/json,.json" style="display:none" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6">
+                        <label><input type="radio" name="le-preview-device" value="desktop" checked /> Preview desktop</label>
+                        <label class="ml-3"><input type="radio" name="le-preview-device" value="mobile" /> Preview mobile</label>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- TESTI -->
         <div class="le-settings-section">
@@ -672,22 +840,48 @@
     <!-- PREVIEW -->
     <div class="col-md-5">
         <div class="le-admin-preview-wrap">
-            <h5>Anteprima live</h5>
-            <div id="le-live-preview" class="le-wrap le-layout-horizontal">
+            <h5>Anteprima live (come in homepage)</h5>
+            <div id="le-live-preview" class="le-wrap le-layout-horizontal le-tpl-classic">
                 <div class="le-card">
                     <span class="le-badge" id="pv-badge">⚡ Edizione Limitata</span>
+                    <span class="le-discount" id="pv-discount" style="display:none;">-15%</span>
                     <h3 class="le-title" id="pv-title">Nome prodotto esempio</h3>
                     <div class="le-message" id="pv-message">Prodotto a tempo limitato!</div>
+                    <div class="le-scarcity" id="pv-scarcity">
+                        Restano <strong id="pv-remaining">12</strong> pezzi · <strong id="pv-sold">47</strong> già venduti
+                    </div>
+                    <div class="le-progress" id="pv-progress"><i id="pv-progress-bar" style="width:45%"></i></div>
                     <div class="le-countdown">
-                        <div class="le-time-box"><span>02</span><small id="pv-days">Giorni</small></div>
-                        <div class="le-time-box"><span>14</span><small id="pv-hours">Ore</small></div>
-                        <div class="le-time-box"><span>37</span><small id="pv-mins">Min</small></div>
-                        <div class="le-time-box"><span>09</span><small id="pv-secs">Sec</small></div>
+                        <div class="le-time-box"><span id="pv-d">02</span><small id="pv-days">Giorni</small></div>
+                        <div class="le-time-box"><span id="pv-h">14</span><small id="pv-hours">Ore</small></div>
+                        <div class="le-time-box"><span id="pv-m">37</span><small id="pv-mins">Min</small></div>
+                        <div class="le-time-box"><span id="pv-s">09</span><small id="pv-secs">Sec</small></div>
                     </div>
                     <a href="javascript:void(0)" class="le-cta" id="pv-cta">Vedi offerta →</a>
                 </div>
             </div>
-            <p class="text-muted small mt-2 mb-0">Le modifiche aggiornano subito l'anteprima. Salva per applicarle sul sito.</p>
+            <div class="le-preview-sample">
+                <div style="margin-bottom:6px;font-weight:700;color:#555;">Dati esempio (solo preview)</div>
+                <label>Rimanenti</label><input type="number" id="pv-sample-remaining" value="12" min="0" />
+                <label>Venduti</label><input type="number" id="pv-sample-sold" value="47" min="0" />
+                <label>Iniziali</label><input type="number" id="pv-sample-initial" value="100" min="1" />
+                <label>Sconto %</label><input type="number" id="pv-sample-discount" value="15" min="0" max="100" />
+                <div style="margin-top:8px;">
+                    <label><input type="checkbox" id="pv-sample-show-stock" checked /> Stock</label>
+                    <label style="margin-left:10px;"><input type="checkbox" id="pv-sample-show-sold" checked /> Venduti</label>
+                    <label style="margin-left:10px;"><input type="checkbox" id="pv-sample-show-progress" checked /> Progress</label>
+                    <label style="margin-left:10px;"><input type="checkbox" id="pv-sample-dyn-badge" /> Badge dinamico</label>
+                    <label style="margin-left:10px;"><input type="checkbox" id="pv-sample-use-image" /> Img sfondo</label>
+                </div>
+                <div style="margin-top:6px;">
+                    <label>Progress mode</label>
+                    <select id="pv-sample-progress-mode">
+                        <option value="0">Tempo</option>
+                        <option value="1">Stock</option>
+                    </select>
+                </div>
+            </div>
+            <p class="text-muted small mt-2 mb-0">L'anteprima replica la card homepage (badge, scarsità, progress, timer, CTA). Salva per applicare sul sito.</p>
         </div>
     </div>
 </div>
@@ -776,12 +970,96 @@
 
     function updateLayout() {
         var sel = document.getElementById('TimerLayoutId');
-        if (!sel) return;
-        preview.classList.remove('le-layout-horizontal', 'le-layout-boxed', 'le-layout-minimal');
-        var v = parseInt(sel.value, 10);
-        if (v === 1) preview.classList.add('le-layout-boxed');
-        else if (v === 2) preview.classList.add('le-layout-minimal');
-        else preview.classList.add('le-layout-horizontal');
+        if (sel) {
+            preview.classList.remove('le-layout-horizontal', 'le-layout-boxed', 'le-layout-minimal');
+            var v = parseInt(sel.value, 10);
+            if (v === 1) preview.classList.add('le-layout-boxed');
+            else if (v === 2) preview.classList.add('le-layout-minimal');
+            else preview.classList.add('le-layout-horizontal');
+        }
+        // template class (come homepage)
+        preview.classList.remove('le-tpl-classic', 'le-tpl-minimal', 'le-tpl-neon', 'le-tpl-soft', 'le-tpl-story');
+        var tpl = document.getElementById('CardTemplateSelect') || document.getElementById('SelectedCardTemplateId');
+        var tid = tpl ? parseInt(tpl.value, 10) : 0;
+        var map = { 0: 'le-tpl-classic', 1: 'le-tpl-minimal', 2: 'le-tpl-neon', 3: 'le-tpl-soft', 4: 'le-tpl-story' };
+        preview.classList.add(map[tid] || 'le-tpl-classic');
+    }
+
+    function updateScarcityPreview() {
+        var remaining = parseInt((document.getElementById('pv-sample-remaining') || {}).value || '12', 10);
+        var sold = parseInt((document.getElementById('pv-sample-sold') || {}).value || '47', 10);
+        var initial = parseInt((document.getElementById('pv-sample-initial') || {}).value || '100', 10);
+        var discount = parseFloat((document.getElementById('pv-sample-discount') || {}).value || '0');
+        var showStock = (document.getElementById('pv-sample-show-stock') || {}).checked;
+        var showSold = (document.getElementById('pv-sample-show-sold') || {}).checked;
+        var showProg = (document.getElementById('pv-sample-show-progress') || {}).checked;
+        // sync with global default if present
+        var defProg = document.getElementById('DefaultShowProgressBar');
+        if (defProg && !document.getElementById('pv-sample-show-progress').matches(':focus')) {
+            // keep sample checkbox independent for preview demo
+        }
+        var mode = parseInt((document.getElementById('pv-sample-progress-mode') || {}).value || '0', 10);
+        var dyn = (document.getElementById('pv-sample-dyn-badge') || {}).checked;
+        var useImg = (document.getElementById('pv-sample-use-image') || {}).checked;
+        var useImgSetting = document.getElementById('UseProductImageAsBackground');
+        if (useImgSetting) useImg = useImg || useImgSetting.checked;
+
+        var scar = document.getElementById('pv-scarcity');
+        var remEl = document.getElementById('pv-remaining');
+        var soldEl = document.getElementById('pv-sold');
+        if (remEl) remEl.textContent = remaining;
+        if (soldEl) soldEl.textContent = sold;
+        if (scar) {
+            if (!showStock && !showSold) scar.style.display = 'none';
+            else {
+                scar.style.display = '';
+                var parts = [];
+                if (showStock) parts.push('Restano <strong id="pv-remaining">' + remaining + '</strong> pezzi');
+                if (showSold) parts.push('<strong id="pv-sold">' + sold + '</strong> già venduti');
+                scar.innerHTML = parts.join(' · ');
+            }
+        }
+
+        var prog = document.getElementById('pv-progress');
+        var bar = document.getElementById('pv-progress-bar');
+        if (prog) prog.style.display = showProg ? '' : 'none';
+        if (bar && showProg) {
+            var pct = 45;
+            if (mode === 1 && initial > 0) pct = Math.min(100, Math.round(100 * sold / initial));
+            bar.style.width = pct + '%';
+        }
+
+        var disc = document.getElementById('pv-discount');
+        if (disc) {
+            if (discount > 0) {
+                disc.style.display = '';
+                disc.textContent = '-' + Math.round(discount) + '%';
+            } else disc.style.display = 'none';
+        }
+
+        var badge = document.getElementById('pv-badge');
+        if (badge && dyn) {
+            badge.classList.add('le-dyn');
+            if (remaining <= 0) badge.textContent = 'SOLD OUT';
+            else if (initial > 0 && (100 * remaining / initial) <= 20) badge.textContent = 'QUASI ESAURITO';
+            else badge.textContent = 'ULTIME 24H';
+        } else if (badge) {
+            badge.classList.remove('le-dyn');
+            var bt = document.getElementById('BadgeText');
+            if (bt && bt.value) badge.textContent = bt.value;
+        }
+        var card = preview.querySelector('.le-card');
+        if (card) {
+            if (useImg) {
+                card.style.backgroundImage = 'linear-gradient(180deg, rgba(0,0,0,.4), rgba(0,0,0,.75)), url("data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'300\'><rect fill=\'%23444\' width=\'400\' height=\'300\'/><text x=\'50%25\' y=\'50%25\' fill=\'%23aaa\' text-anchor=\'middle\' font-size=\'16\'>Product image</text></svg>")';
+                card.style.backgroundSize = 'cover';
+                card.style.backgroundPosition = 'center';
+            } else {
+                card.style.backgroundImage = '';
+                // restore gradient from CSS vars
+                card.style.background = '';
+            }
+        }
     }
 
     function updateTexts() {
@@ -850,5 +1128,187 @@
     updateVisibility();
     updateLayout();
     updateTexts();
+    updateScarcityPreview();
+
+    ['pv-sample-remaining','pv-sample-sold','pv-sample-initial','pv-sample-discount','pv-sample-progress-mode'].forEach(function(id){
+        var e = document.getElementById(id);
+        if (e) e.addEventListener('input', updateScarcityPreview);
+        if (e) e.addEventListener('change', updateScarcityPreview);
+    });
+    ['pv-sample-show-stock','pv-sample-show-sold','pv-sample-show-progress','pv-sample-dyn-badge','pv-sample-use-image'].forEach(function(id){
+        var e = document.getElementById(id);
+        if (e) e.addEventListener('change', updateScarcityPreview);
+    });
+    var defProg = document.getElementById('DefaultShowProgressBar');
+    if (defProg) {
+        defProg.addEventListener('change', function(){
+            var cb = document.getElementById('pv-sample-show-progress');
+            if (cb) { cb.checked = defProg.checked; updateScarcityPreview(); }
+        });
+    }
+    var defMode = document.getElementById('DefaultProgressBarMode');
+    if (defMode) {
+        defMode.addEventListener('change', function(){
+            var s = document.getElementById('pv-sample-progress-mode');
+            if (s) { s.value = defMode.value; updateScarcityPreview(); }
+        });
+    }
+    var dynBadge = document.getElementById('EnableDynamicBadges');
+    if (dynBadge) {
+        dynBadge.addEventListener('change', function(){
+            var cb = document.getElementById('pv-sample-dyn-badge');
+            if (cb) { cb.checked = dynBadge.checked; updateScarcityPreview(); }
+        });
+    }
+    var useImgSet = document.getElementById('UseProductImageAsBackground');
+    if (useImgSet) {
+        var sampleImg = document.getElementById('pv-sample-use-image');
+        if (sampleImg) sampleImg.checked = useImgSet.checked;
+        useImgSet.addEventListener('change', function(){
+            if (sampleImg) sampleImg.checked = useImgSet.checked;
+            updateScarcityPreview();
+        });
+    }
+
+    // ── Template switcher (card) ───────────────────────────────────────────
+    var cardSelect = document.getElementById('CardTemplateSelect');
+    var cardHidden = document.getElementById('SelectedCardTemplateId');
+    if (cardSelect && cardHidden) {
+        cardSelect.value = cardHidden.value || '0';
+        cardSelect.addEventListener('change', function () {
+            var tid = parseInt(cardSelect.value, 10);
+            cardHidden.value = tid;
+            // Carica stile del template via AJAX
+            fetch('@Url.Action("GetTemplateStyle", "LimitedTime", new { area = "Admin" })?kind=card&templateId=' + tid)
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data || !data.success || !data.style) return;
+                    var st = data.style;
+                    function setVal(id, v) {
+                        var e = document.getElementById(id);
+                        if (!e || v === undefined || v === null) return;
+                        if (e.type === 'checkbox') e.checked = !!v;
+                        else e.value = v;
+                        e.dispatchEvent(new Event('input', { bubbles: true }));
+                        e.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                    setVal('BadgeText', st.badgeText || st.BadgeText);
+                    setVal('CtaText', st.ctaText || st.CtaText);
+                    setVal('ExpiredText', st.expiredText || st.ExpiredText);
+                    setVal('DaysLabel', st.daysLabel || st.DaysLabel);
+                    setVal('HoursLabel', st.hoursLabel || st.HoursLabel);
+                    setVal('MinutesLabel', st.minutesLabel || st.MinutesLabel);
+                    setVal('SecondsLabel', st.secondsLabel || st.SecondsLabel);
+                    setVal('ShowBadge', st.showBadge !== undefined ? st.showBadge : st.ShowBadge);
+                    setVal('ShowTitle', st.showTitle !== undefined ? st.showTitle : st.ShowTitle);
+                    setVal('ShowMessage', st.showMessage !== undefined ? st.showMessage : st.ShowMessage);
+                    setVal('ShowCta', st.showCta !== undefined ? st.showCta : st.ShowCta);
+                    setVal('EnableGlowAnimation', st.enableGlowAnimation !== undefined ? st.enableGlowAnimation : st.EnableGlowAnimation);
+                    setVal('EnableSheenAnimation', st.enableSheenAnimation !== undefined ? st.enableSheenAnimation : st.EnableSheenAnimation);
+                    setVal('TimerLayoutId', st.timerLayoutId !== undefined ? st.timerLayoutId : st.TimerLayoutId);
+                    setVal('AccentColor', st.accentColor || st.AccentColor);
+                    setVal('AccentColorLight', st.accentColorLight || st.AccentColorLight);
+                    setVal('CardBackgroundStart', st.cardBackgroundStart || st.CardBackgroundStart);
+                    setVal('CardBackgroundMid', st.cardBackgroundMid || st.CardBackgroundMid);
+                    setVal('CardBackgroundEnd', st.cardBackgroundEnd || st.CardBackgroundEnd);
+                    setVal('BorderColor', st.borderColor || st.BorderColor);
+                    setVal('TitleColor', st.titleColor || st.TitleColor);
+                    setVal('MessageColor', st.messageColor || st.MessageColor);
+                    setVal('BadgeTextColor', st.badgeTextColor || st.BadgeTextColor);
+                    setVal('BadgeBackgroundStart', st.badgeBackgroundStart || st.BadgeBackgroundStart);
+                    setVal('BadgeBackgroundEnd', st.badgeBackgroundEnd || st.BadgeBackgroundEnd);
+                    setVal('TimerDigitColor', st.timerDigitColor || st.TimerDigitColor);
+                    setVal('TimerLabelColor', st.timerLabelColor || st.TimerLabelColor);
+                    setVal('TimerBoxBackground', st.timerBoxBackground || st.TimerBoxBackground);
+                    setVal('TimerBoxBorderColor', st.timerBoxBorderColor || st.TimerBoxBorderColor);
+                    setVal('CtaBackgroundStart', st.ctaBackgroundStart || st.CtaBackgroundStart);
+                    setVal('CtaBackgroundEnd', st.ctaBackgroundEnd || st.CtaBackgroundEnd);
+                    setVal('CtaTextColor', st.ctaTextColor || st.CtaTextColor);
+                    setVal('TimerDigitFontSize', st.timerDigitFontSize || st.TimerDigitFontSize);
+                    setVal('TimerLabelFontSize', st.timerLabelFontSize || st.TimerLabelFontSize);
+                    setVal('TimerBoxMinWidth', st.timerBoxMinWidth || st.TimerBoxMinWidth);
+                    setVal('TimerBoxBorderRadius', st.timerBoxBorderRadius !== undefined ? st.timerBoxBorderRadius : st.TimerBoxBorderRadius);
+                    setVal('TimerBoxPadding', st.timerBoxPadding !== undefined ? st.timerBoxPadding : st.TimerBoxPadding);
+                    setVal('TimerGap', st.timerGap !== undefined ? st.timerGap : st.TimerGap);
+                    setVal('CardBorderRadius', st.cardBorderRadius !== undefined ? st.cardBorderRadius : st.CardBorderRadius);
+                    setVal('CardPaddingTop', st.cardPaddingTop || st.CardPaddingTop);
+                    setVal('CardPaddingSide', st.cardPaddingSide || st.CardPaddingSide);
+                    setVal('CardPaddingBottom', st.cardPaddingBottom || st.CardPaddingBottom);
+                    setVal('CardMarginBottom', st.cardMarginBottom !== undefined ? st.cardMarginBottom : st.CardMarginBottom);
+                    setVal('CardBorderWidth', st.cardBorderWidth !== undefined ? st.cardBorderWidth : st.CardBorderWidth);
+                    setVal('CardTextAlign', st.cardTextAlign || st.CardTextAlign);
+                    setVal('TitleFontSize', st.titleFontSize || st.TitleFontSize);
+                    setVal('TitleFontWeight', st.titleFontWeight || st.TitleFontWeight);
+                    setVal('MessageFontSize', st.messageFontSize || st.MessageFontSize);
+                    setVal('BadgeFontSize', st.badgeFontSize || st.BadgeFontSize);
+                    setVal('BadgeFontWeight', st.badgeFontWeight || st.BadgeFontWeight);
+                    setVal('BadgeLetterSpacing', st.badgeLetterSpacing !== undefined ? st.badgeLetterSpacing : st.BadgeLetterSpacing);
+                    setVal('BadgePaddingY', st.badgePaddingY !== undefined ? st.badgePaddingY : st.BadgePaddingY);
+                    setVal('BadgePaddingX', st.badgePaddingX || st.BadgePaddingX);
+                    setVal('CtaFontSize', st.ctaFontSize || st.CtaFontSize);
+                    setVal('CtaFontWeight', st.ctaFontWeight || st.CtaFontWeight);
+                    setVal('CtaPaddingY', st.ctaPaddingY || st.CtaPaddingY);
+                    setVal('CtaPaddingX', st.ctaPaddingX || st.CtaPaddingX);
+                    setVal('CtaBorderRadius', st.ctaBorderRadius !== undefined ? st.ctaBorderRadius : st.CtaBorderRadius);
+                    setVal('FontFamily', st.fontFamily || st.FontFamily);
+                    // sync color pickers
+                    document.querySelectorAll('.le-color-picker').forEach(function (picker) {
+                        var targetName = picker.getAttribute('data-target');
+                        var textInput = document.getElementById(targetName);
+                        if (textInput && textInput.value) {
+                            try { picker.value = toHex(textInput.value); } catch (e) {}
+                        }
+                    });
+                    document.querySelectorAll('.le-range').forEach(function (range) {
+                        var field = range.getAttribute('data-field');
+                        var label = document.querySelector('.le-range-val[data-for="' + field + '"]');
+                        if (label) label.textContent = range.value;
+                    });
+                    updateVisibility();
+                    updateLayout();
+                    updateTexts();
+                });
+        });
+    }
+
+    // Import templates
+    var impBtn = document.getElementById('le-import-btn');
+    var impFile = document.getElementById('le-import-file');
+    if (impBtn && impFile) {
+        impBtn.addEventListener('click', function () { impFile.click(); });
+        impFile.addEventListener('change', function () {
+            var f = impFile.files && impFile.files[0];
+            if (!f) return;
+            var reader = new FileReader();
+            reader.onload = function () {
+                var token = document.querySelector('input[name="__RequestVerificationToken"]');
+                var body = new FormData();
+                body.append('templatesJson', reader.result);
+                if (token) body.append('__RequestVerificationToken', token.value);
+                fetch('@Url.Action("ImportTemplates", "LimitedTime", new { area = "Admin" })', { method: 'POST', body: body })
+                    .then(function (r) { return r.json(); })
+                    .then(function (d) {
+                        if (d && d.success) location.reload();
+                        else alert('Import fallito: ' + (d && d.error ? d.error : ''));
+                    });
+            };
+            reader.readAsText(f);
+        });
+    }
+    // Mobile/desktop preview
+    document.querySelectorAll('input[name="le-preview-device"]').forEach(function (r) {
+        r.addEventListener('change', function () {
+            var wrap = document.querySelector('.le-admin-preview-wrap');
+            if (!wrap) return;
+            if (r.value === 'mobile') {
+                wrap.style.maxWidth = '375px';
+                wrap.style.marginLeft = 'auto';
+                wrap.style.marginRight = 'auto';
+            } else {
+                wrap.style.maxWidth = '';
+            }
+        });
+    });
+
 })();
 </script>

@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <Copyright>Copyright © Il Tuo Nome</Copyright>
-    <Company>Il Tuo Nome</Company>
-    <Authors>Il Tuo Nome</Authors>
+    <Copyright>Copyright © Limited Edition</Copyright>
+    <Company>Limited Edition</Company>
+    <Authors>Limited Edition</Authors>
     <PackageProjectUrl></PackageProjectUrl>
     <OutputPath>$(SolutionDir)\Presentation\Nop.Web\Plugins\Widgets.LimitedEdition</OutputPath>
     <OutDir>$(OutputPath)</OutDir>
@@ -13,12 +13,7 @@
 
   <ItemGroup>
     <None Remove="plugin.json" />
-    <None Remove="Views\Shared\Components\WidgetsLimitedEdition\LimitedEditionView.cshtml" />
-    <None Remove="Views\Shared\Components\WidgetsLimitedEdition\_CountdownScript.cshtml" />
-    <None Remove="Views\_ProductsGrid.cshtml" />
-    <None Remove="Views\_ViewImports.cshtml" />
-    <None Remove="Views\Configure.cshtml" />
-    <None Remove="Views\_SettingsForm.cshtml" />
+    <None Remove="Views\**\*.*" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,13 +28,10 @@
   <ItemGroup>
     <ProjectReference Include="$(SolutionDir)\Presentation\Nop.Web\Nop.Web.csproj" />
     <ProjectReference Include="$(SolutionDir)\Libraries\Nop.Data\Nop.Data.csproj" />
-    <ProjectReference Include="..\Nop.Plugin.Misc.Notes\Nop.Plugin.Misc.Notes.csproj" />
     <ClearPluginAssemblies Include="$(SolutionDir)\Build\ClearPluginAssemblies.proj" />
   </ItemGroup>
 
-  <!-- This target execute after "Build" target -->
   <Target Name="NopTarget" AfterTargets="Build">
-    <!-- Delete unnecessary libraries from plugins path -->
     <MSBuild Projects="@(ClearPluginAssemblies)" Properties="PluginPath=$(OutDir)" Targets="NopClear" />
   </Target>
 </Project>

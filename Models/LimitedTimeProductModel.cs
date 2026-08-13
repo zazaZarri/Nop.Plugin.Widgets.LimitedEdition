@@ -1,24 +1,14 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using Nop.Web.Framework.Models;
 using Nop.Web.Framework.Mvc.ModelBinding;
 
 namespace Nop.Plugin.Widgets.LimitedEdition.Models
 {
-    /// <summary>
-    /// Modello di riga per la griglia admin (Tab 1) e per il form di editing.
-    /// Non è l'entità di dominio: mappa i suoi campi più dati aggiuntivi
-    /// per la sola visualizzazione (es. ProductName).
-    /// </summary>
     public partial record LimitedTimeProductModel : BaseNopEntityModel
     {
         [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Fields.ProductId")]
         public int ProductId { get; set; }
-
-        /// <summary>
-        /// Nome del prodotto nativo, letto a runtime tramite IProductService
-        /// SOLO per la visualizzazione in griglia (non salvato in questa tabella)
-        /// </summary>
         public string ProductName { get; set; }
 
         [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Fields.StartDateUtc")]
@@ -31,5 +21,15 @@ namespace Nop.Plugin.Widgets.LimitedEdition.Models
 
         [NopResourceDisplayName("Plugins.Widgets.LimitedEdition.Fields.IsActive")]
         public bool IsActive { get; set; }
+
+        public int InitialQuantity { get; set; }
+        public int RemainingQuantity { get; set; }
+        public int SoldCount { get; set; }
+        public bool ShowRemainingStock { get; set; }
+        public bool ShowSoldCount { get; set; }
+        public bool ShowProgressBar { get; set; }
+        public int ProgressBarMode { get; set; }
+        public decimal DiscountPercentage { get; set; }
+        public bool BlockPurchaseWhenExpired { get; set; }
     }
 }

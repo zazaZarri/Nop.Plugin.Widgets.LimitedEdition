@@ -1,4 +1,5 @@
 @using System.Linq
+@using System.Globalization
 @model Nop.Plugin.Widgets.LimitedEdition.Models.HomepageOffersModel
 
 @{
@@ -9,6 +10,20 @@
         Nop.Plugin.Widgets.LimitedEdition.Domain.TimerLayoutType.Minimal => "le-layout-minimal",
         _ => "le-layout-horizontal"
     };
+    var templateId = Model.CardTemplateId;
+    var templateClass = templateId switch
+    {
+        1 => "le-tpl-minimal",
+        2 => "le-tpl-neon",
+        3 => "le-tpl-soft",
+        4 => "le-tpl-story",
+        _ => "le-tpl-classic"
+    };
+    if (Model.CompactLayout)
+    {
+        templateClass += " le-compact";
+    }
+    var offers = Model.Offers ?? Enumerable.Empty<Nop.Plugin.Widgets.LimitedEdition.Models.PublicInfoModel>();
 }
 
 <style>
@@ -57,11 +72,9 @@
         --le-cta-py: @(s.CtaPaddingY)px;
         --le-cta-px: @(s.CtaPaddingX)px;
         --le-cta-radius: @(s.CtaBorderRadius)px;
-        font-family: inherit;
         --le-font: @s.FontFamily;
         font-family: var(--le-font);
     }
-
     .le-card {
         position: relative;
         background: linear-gradient(145deg, var(--le-bg-start) 0%, var(--le-bg-mid) 55%, var(--le-bg-end) 100%);
@@ -71,41 +84,22 @@
         margin-bottom: var(--le-card-margin-b);
         text-align: var(--le-card-align);
         overflow: hidden;
-        box-shadow: 0 0 0 1px color-mix(in srgb, var(--le-accent) 8%, transparent),
-                    0 12px 40px rgba(0, 0, 0, 0.45),
-                    0 0 28px color-mix(in srgb, var(--le-accent) 15%, transparent);
-        @if (s.EnableGlowAnimation)
-        {
-            <text>animation: le-glow 3s ease-in-out infinite;</text>
-        }
+        box-shadow: 0 12px 40px rgba(0,0,0,.35);
     }
-
-    @@keyframes le-glow {
-        0%, 100% { box-shadow: 0 0 0 1px color-mix(in srgb, var(--le-accent) 8%, transparent), 0 12px 40px rgba(0,0,0,.45), 0 0 18px color-mix(in srgb, var(--le-accent) 12%, transparent); }
-        50%      { box-shadow: 0 0 0 1px color-mix(in srgb, var(--le-accent) 18%, transparent), 0 12px 40px rgba(0,0,0,.45), 0 0 34px color-mix(in srgb, var(--le-accent) 35%, transparent); }
+    .le-card.le-has-img {
+        background-size: cover;
+        background-position: center;
+        min-height: 260px;
     }
-
-    .le-card::before {
+    .le-card.le-has-img::after {
         content: "";
         position: absolute;
         inset: 0;
-        background: linear-gradient(120deg, transparent 30%, color-mix(in srgb, var(--le-accent) 10%, transparent) 40%, transparent 67%);
-        background-size: 220% 100%;
+        background: linear-gradient(180deg, rgba(0,0,0,.35) 0%, rgba(0,0,0,.78) 100%);
         pointer-events: none;
-        @if (s.EnableSheenAnimation)
-        {
-            <text>animation: le-sheen 6s linear infinite;</text>
-        }
-        else
-        {
-            <text>display: none;</text>
-        }
+        z-index: 0;
     }
-
-    @@keyframes le-sheen {
-        0%   { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-    }
+    .le-card.le-has-img > * { position: relative; z-index: 1; }
 
     .le-badge {
         display: inline-block;
@@ -117,40 +111,76 @@
         background: linear-gradient(90deg, var(--le-badge-bg-start), var(--le-badge-bg-end));
         padding: var(--le-badge-py) var(--le-badge-px);
         border-radius: 999px;
-        margin-bottom: 14px;
-        box-shadow: 0 2px 10px color-mix(in srgb, var(--le-accent) 50%, transparent);
+        margin-bottom: 12px;
         position: relative;
         z-index: 1;
     }
-
+    .le-badge.le-dyn { animation: le-pulse 1.6s ease-in-out infinite; }
+    @@keyframes le-pulse {
+        0%,100% { transform: scale(1); }
+        50% { transform: scale(1.04); }
+    }
+    .le-discount {
+        display: inline-block;
+        margin-left: 8px;
+        background: var(--le-accent);
+        color: #111;
+        font-weight: 800;
+        font-size: 12px;
+        padding: 2px 8px;
+        border-radius: 6px;
+        vertical-align: middle;
+        position: relative;
+        z-index: 1;
+    }
     .le-title {
         margin: 0 0 6px;
         font-size: var(--le-title-size);
         font-weight: var(--le-title-weight);
         color: var(--le-title);
-        letter-spacing: .3px;
         position: relative;
         z-index: 1;
     }
-
     .le-message {
         font-size: var(--le-msg-size);
         color: var(--le-message);
-        margin-bottom: 18px;
+        margin-bottom: 12px;
         position: relative;
         z-index: 1;
     }
-
+    .le-scarcity {
+        margin: 6px 0 12px;
+        font-size: 13px;
+        color: var(--le-message);
+        position: relative;
+        z-index: 1;
+    }
+    .le-scarcity strong { color: var(--le-accent); }
+    .le-progress {
+        height: 6px;
+        background: rgba(255,255,255,.14);
+        border-radius: 99px;
+        overflow: hidden;
+        margin: 0 0 14px;
+        position: relative;
+        z-index: 1;
+    }
+    .le-progress > i {
+        display: block;
+        height: 100%;
+        background: linear-gradient(90deg, var(--le-accent), var(--le-accent-light));
+        border-radius: 99px;
+        transition: width .5s ease;
+    }
     .le-countdown {
         display: flex;
         justify-content: center;
         gap: var(--le-timer-gap);
-        margin: 4px 0 20px;
+        margin: 4px 0 16px;
         position: relative;
         z-index: 1;
         flex-wrap: wrap;
     }
-
     .le-layout-boxed .le-countdown {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -158,22 +188,13 @@
         margin-left: auto;
         margin-right: auto;
     }
-
     .le-layout-minimal .le-time-box {
         background: transparent;
         border: none;
         min-width: auto;
         padding: 0 4px;
     }
-
-    .le-layout-minimal .le-time-box small {
-        display: none;
-    }
-
-    .le-layout-minimal .le-countdown::after {
-        content: none;
-    }
-
+    .le-layout-minimal .le-time-box small { display: none; }
     .le-time-box {
         min-width: var(--le-box-min-w);
         background: var(--le-box-bg);
@@ -181,17 +202,14 @@
         border-radius: var(--le-box-radius);
         padding: var(--le-box-pad) 5px 6px;
     }
-
     .le-time-box span {
         display: block;
         font-size: var(--le-digit-size);
         font-weight: 800;
         line-height: 1;
         color: var(--le-digit);
-        text-shadow: 0 0 12px color-mix(in srgb, var(--le-accent) 55%, transparent);
         font-variant-numeric: tabular-nums;
     }
-
     .le-time-box small {
         display: block;
         margin-top: 4px;
@@ -200,108 +218,211 @@
         text-transform: uppercase;
         color: var(--le-label);
     }
-
     .le-cta {
         position: relative;
         display: inline-block;
-        overflow: hidden;
         background: linear-gradient(90deg, var(--le-cta-bg-start), var(--le-cta-bg-end));
-        color: var(--le-cta-text);
+        color: var(--le-cta-text) !important;
         font-weight: var(--le-cta-weight);
         font-size: var(--le-cta-size);
-        letter-spacing: .4px;
         padding: var(--le-cta-py) var(--le-cta-px);
         border-radius: var(--le-cta-radius);
-        text-decoration: none;
-        transition: transform .2s ease, box-shadow .2s ease;
-        box-shadow: 0 6px 18px color-mix(in srgb, var(--le-accent) 35%, transparent);
+        text-decoration: none !important;
         z-index: 1;
     }
-
-    .le-cta:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 26px color-mix(in srgb, var(--le-accent) 55%, transparent);
-        color: var(--le-cta-text);
+    .le-cta.le-disabled {
+        opacity: .45;
+        pointer-events: none;
+        cursor: not-allowed;
     }
-
-    .le-card--product {
-        padding: calc(var(--le-card-pad-t) * 0.7) var(--le-card-pad-s) calc(var(--le-card-pad-b) * 0.75);
+    .le-tpl-minimal .le-card { box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .le-tpl-neon .le-time-box span { text-shadow: 0 0 16px color-mix(in srgb, var(--le-accent) 80%, transparent); }
+    .le-tpl-soft .le-card { box-shadow: 0 8px 32px rgba(0,0,0,.08); }
+    .le-compact .le-card { padding: 16px 18px; }
+    .le-compact .le-title { font-size: 16px; }
+    .le-card--product { padding: calc(var(--le-card-pad-t) * 0.7) var(--le-card-pad-s) calc(var(--le-card-pad-b) * 0.75); }
+    #le-social-toast {
+        position: fixed; left: 16px; bottom: 16px; z-index: 99999;
+        max-width: 320px; background: #111; color: #fff; border-radius: 12px;
+        padding: 12px 14px; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,.35);
+        opacity: 0; transform: translateY(12px); transition: .35s ease; pointer-events: none;
+        border: 1px solid rgba(255,255,255,.12);
     }
-
-    .le-card--product .le-countdown {
-        margin-bottom: 4px;
-    }
+    #le-social-toast.on { opacity: 1; transform: translateY(0); }
 </style>
 
-@if (Model.IsProductPage)
+<div class="le-wrap @layoutClass @templateClass">
+@foreach (var offer in offers)
 {
-    var offer = Model.Offers?.FirstOrDefault();
-    if (offer != null)
-    {
-        var endDateJs = offer.EndDateUtc.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
-        var style = offer.Style ?? s;
+    var style = offer.Style ?? s;
+    var endDateJs = offer.EndDateUtc.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+    var badgeText = offer.UseDynamicBadge && !string.IsNullOrEmpty(offer.DynamicBadgeText)
+        ? offer.DynamicBadgeText
+        : style.BadgeText;
+    var useImg = Model.UseProductImageAsBackground && !string.IsNullOrEmpty(offer.ProductImageUrl);
+    var bgStyle = useImg ? $"background-image:url('{offer.ProductImageUrl}');" : "";
+    var progressWidth = offer.ProgressPercent.ToString(CultureInfo.InvariantCulture);
+    var isProduct = Model.IsProductPage;
 
-        <div class="le-wrap @layoutClass">
-            <div class="le-card le-card--product">
-                @if (style.ShowBadge)
-                {
-                    <span class="le-badge">@style.BadgeText</span>
-                }
-                @if (style.ShowMessage)
-                {
-                    <div class="le-message">@offer.CustomMessage</div>
-                }
+    <div class="le-card @(isProduct ? "le-card--product" : "") @(useImg ? "le-has-img" : "")"
+         style="@bgStyle"
+         data-product-id="@offer.ProductId"
+         data-end="@endDateJs"
+         data-blocked="@(offer.BlockPurchase ? "1" : "0")">
 
-                <div class="le-countdown"
-                     data-end="@endDateJs"
-                     data-expired="@style.ExpiredText">
-                    <div class="le-time-box"><span class="days">00</span><small>@style.DaysLabel</small></div>
-                    <div class="le-time-box"><span class="hours">00</span><small>@style.HoursLabel</small></div>
-                    <div class="le-time-box"><span class="minutes">00</span><small>@style.MinutesLabel</small></div>
-                    <div class="le-time-box"><span class="seconds">00</span><small>@style.SecondsLabel</small></div>
-                </div>
-            </div>
-        </div>
-    }
-}
-else
-{
-    <div class="le-wrap @layoutClass">
-        @foreach (var offer in Model.Offers ?? Enumerable.Empty<Nop.Plugin.Widgets.LimitedEdition.Models.PublicInfoModel>())
+        @if (style.ShowBadge || offer.UseDynamicBadge)
         {
-            var endDateJs = offer.EndDateUtc.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
-            var style = offer.Style ?? s;
+            <span class="le-badge @(offer.UseDynamicBadge ? "le-dyn" : "")">@badgeText</span>
+        }
+        @if (offer.DiscountPercentage > 0)
+        {
+            <span class="le-discount">-@((int)offer.DiscountPercentage)%</span>
+        }
+        @if (style.ShowTitle && !isProduct)
+        {
+            <h3 class="le-title">@offer.ProductName</h3>
+        }
+        @if (style.ShowMessage)
+        {
+            <div class="le-message">@offer.CustomMessage</div>
+        }
 
-            <div class="le-card">
-                @if (style.ShowBadge)
+        @if (offer.ShowRemainingStock || offer.ShowSoldCount)
+        {
+            <div class="le-scarcity">
+                @if (offer.ShowRemainingStock && offer.InitialQuantity > 0)
                 {
-                    <span class="le-badge">@style.BadgeText</span>
+                    <span>Restano <strong>@offer.RemainingQuantity</strong> pezzi</span>
                 }
-                @if (style.ShowTitle)
+                @if (offer.ShowSoldCount && offer.SoldCount > 0)
                 {
-                    <h3 class="le-title">@offer.ProductName</h3>
-                }
-                @if (style.ShowMessage)
-                {
-                    <div class="le-message">@offer.CustomMessage</div>
-                }
-
-                <div class="le-countdown"
-                     data-end="@endDateJs"
-                     data-expired="@style.ExpiredText">
-                    <div class="le-time-box"><span class="days">00</span><small>@style.DaysLabel</small></div>
-                    <div class="le-time-box"><span class="hours">00</span><small>@style.HoursLabel</small></div>
-                    <div class="le-time-box"><span class="minutes">00</span><small>@style.MinutesLabel</small></div>
-                    <div class="le-time-box"><span class="seconds">00</span><small>@style.SecondsLabel</small></div>
-                </div>
-
-                @if (style.ShowCta)
-                {
-                    <a href="@offer.ProductUrl" class="le-cta">@style.CtaText</a>
+                    <span>@(offer.ShowRemainingStock && offer.InitialQuantity > 0 ? " · " : "")<strong>@offer.SoldCount</strong> già venduti</span>
                 }
             </div>
         }
+
+        @if (offer.ShowProgressBar)
+        {
+            <div class="le-progress" title="@(offer.ProgressBarMode == 1 ? "Stock" : "Tempo")">
+                <i style="width:@(progressWidth)%"></i>
+            </div>
+        }
+
+        <div class="le-countdown"
+             data-end="@endDateJs"
+             data-expired="@(style.ExpiredText ?? "Offerta scaduta!")"
+             data-product-id="@offer.ProductId">
+            <div class="le-time-box"><span class="days">00</span><small>@(style.DaysLabel ?? "Giorni")</small></div>
+            <div class="le-time-box"><span class="hours">00</span><small>@(style.HoursLabel ?? "Ore")</small></div>
+            <div class="le-time-box"><span class="minutes">00</span><small>@(style.MinutesLabel ?? "Min")</small></div>
+            <div class="le-time-box"><span class="seconds">00</span><small>@(style.SecondsLabel ?? "Sec")</small></div>
+        </div>
+
+        @if (!isProduct && style.ShowCta)
+        {
+            if (offer.BlockPurchase || offer.IsExpired || offer.IsSoldOut)
+            {
+                <span class="le-cta le-disabled">@(offer.IsSoldOut ? "Sold out" : (style.ExpiredText ?? "Scaduto"))</span>
+            }
+            else
+            {
+                <a href="@offer.ProductUrl" class="le-cta">@(style.CtaText ?? "Vedi offerta")</a>
+            }
+        }
     </div>
+}
+</div>
+
+@if (Model.EnableSocialProof)
+{
+    <div id="le-social-toast" aria-live="polite"></div>
 }
 
 @await Html.PartialAsync("~/Plugins/Widgets.LimitedEdition/Views/Shared/_CountdownScript.cshtml")
+
+<script>
+(function () {
+    var serverUrl = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ServerCountdownUrl ?? ""));
+    var socialUrl = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SocialProofFeedUrl ?? ""));
+    var enableServer = @(Model.EnableServerCountdown ? "true" : "false");
+    var enableSound = @(Model.EnableLastHourSound ? "true" : "false");
+    var enableSocial = @(Model.EnableSocialProof ? "true" : "false");
+    var socialInterval = @(Model.SocialProofIntervalSeconds > 0 ? Model.SocialProofIntervalSeconds : 12) * 1000;
+
+    if (enableServer && serverUrl) {
+        document.querySelectorAll('.le-countdown[data-product-id]').forEach(function (box) {
+            var pid = box.getAttribute('data-product-id');
+            if (!pid) return;
+            fetch(serverUrl + '?productId=' + encodeURIComponent(pid))
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data || !data.success || !data.endDateUtc) return;
+                    box.setAttribute('data-end', data.endDateUtc);
+                    var card = box.closest('.le-card');
+                    if (card && data.progressPercent != null) {
+                        var bar = card.querySelector('.le-progress > i');
+                        if (bar) bar.style.width = data.progressPercent + '%';
+                    }
+                }).catch(function () {});
+        });
+    }
+
+    if (enableSound) {
+        var audioCtx;
+        function beep() {
+            try {
+                audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+                var o = audioCtx.createOscillator();
+                var g = audioCtx.createGain();
+                o.connect(g); g.connect(audioCtx.destination);
+                o.frequency.value = 880;
+                g.gain.value = 0.03;
+                o.start();
+                setTimeout(function () { o.stop(); }, 60);
+            } catch (e) {}
+        }
+        setInterval(function () {
+            document.querySelectorAll('.le-countdown[data-end]').forEach(function (box) {
+                var end = new Date(box.getAttribute('data-end')).getTime();
+                var diff = end - Date.now();
+                if (diff > 0 && diff < 3600000) beep();
+            });
+        }, 60000);
+    }
+
+    document.querySelectorAll('.le-card[data-blocked="1"]').forEach(function () {
+        document.querySelectorAll('button[id*="add-to-cart"], .add-to-cart-button').forEach(function (btn) {
+            btn.disabled = true;
+            btn.classList.add('disabled');
+            btn.title = 'Edizione non più disponibile';
+        });
+    });
+
+    if (enableSocial && socialUrl) {
+        var toast = document.getElementById('le-social-toast');
+        var queue = [];
+        var idx = 0;
+        function showNext() {
+            if (!toast || !queue.length) return;
+            var item = queue[idx % queue.length];
+            idx++;
+            var verb = item.eventType === 'purchase' ? 'ha acquistato' :
+                       item.eventType === 'viewing' ? 'sta guardando' : 'ha aggiunto al carrello';
+            toast.textContent = (item.city ? item.city + ' · ' : '') + verb + ' ' + (item.productName || 'un prodotto') +
+                (item.minutesAgo != null ? ' · ' + item.minutesAgo + ' min fa' : '');
+            toast.classList.add('on');
+            setTimeout(function () { toast.classList.remove('on'); }, 4200);
+        }
+        fetch(socialUrl + '?take=10')
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (!data || !data.items) return;
+                queue = data.items;
+                if (queue.length) {
+                    setTimeout(showNext, 2500);
+                    setInterval(showNext, socialInterval);
+                }
+            }).catch(function () {});
+    }
+})();
+</script>

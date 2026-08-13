@@ -95,8 +95,30 @@
     .le-field-label { font-weight: 600; padding-top: 7px; }
 </style>
 
+<input type="hidden" asp-for="SelectedPopupTemplateId" id="SelectedPopupTemplateId" />
+
 <div class="row">
     <div class="col-md-7">
+        <div class="le-settings-section" style="border:1px solid #d4af37;border-radius:6px;margin-bottom:18px;overflow:hidden;">
+            <div class="section-header" style="background:linear-gradient(90deg,#f8f9fa,#fff8e7);padding:10px 16px;font-weight:600;border-bottom:1px solid #e5e5e5;">
+                Template popup
+            </div>
+            <div class="section-body" style="padding:16px 12px;">
+                <p class="text-muted small mb-2">Ogni template popup ha stile e testi <strong>indipendenti</strong>. Salvando aggiorni solo il template selezionato.</p>
+                <div class="form-group row mb-0">
+                    <div class="col-md-4"><label class="le-field-label">Template attivo</label></div>
+                    <div class="col-md-8">
+                        <select id="PopupTemplateSelect" class="form-control">
+                            <option value="0">Classic — Gold luxury</option>
+                            <option value="1">Minimal — Chiaro e pulito</option>
+                            <option value="2">Neon — Cyber glow</option>
+                            <option value="3">Soft — Pastel elegante</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="le-settings-section" style="border:1px solid #e5e5e5;border-radius:6px;margin-bottom:18px;overflow:hidden;">
             <div class="section-header" style="background:#f8f9fa;padding:10px 16px;font-weight:600;border-bottom:1px solid #e5e5e5;">
                 Popup carrello – comportamento
@@ -379,5 +401,50 @@
 
     applyPreview();
     setTimeout(playAnim, 300);
+
+    // ── Template switcher (popup) ──────────────────────────────────────────
+    var popSelect = el('PopupTemplateSelect');
+    var popHidden = el('SelectedPopupTemplateId');
+    if (popSelect && popHidden) {
+        popSelect.value = popHidden.value || '0';
+        popSelect.addEventListener('change', function () {
+            var tid = parseInt(popSelect.value, 10);
+            popHidden.value = tid;
+            fetch('@Url.Action("GetTemplateStyle", "LimitedTime", new { area = "Admin" })?kind=popup&templateId=' + tid)
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data || !data.success || !data.style) return;
+                    var st = data.style;
+                    function setVal(id, v) {
+                        var e = el(id);
+                        if (!e || v === undefined || v === null) return;
+                        if (e.type === 'checkbox') e.checked = !!v;
+                        else e.value = v;
+                        e.dispatchEvent(new Event('input', { bubbles: true }));
+                        e.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                    setVal('PopupTitle', st.popupTitle || st.PopupTitle);
+                    setVal('PopupSubtitle', st.popupSubtitle || st.PopupSubtitle);
+                    setVal('PopupContinueText', st.popupContinueText || st.PopupContinueText);
+                    setVal('PopupShowBadge', st.popupShowBadge !== undefined ? st.popupShowBadge : st.PopupShowBadge);
+                    setVal('PopupShowProductList', st.popupShowProductList !== undefined ? st.popupShowProductList : st.PopupShowProductList);
+                    setVal('PopupEnableGlow', st.popupEnableGlow !== undefined ? st.popupEnableGlow : st.PopupEnableGlow);
+                    setVal('PopupEnableSheen', st.popupEnableSheen !== undefined ? st.popupEnableSheen : st.PopupEnableSheen);
+                    setVal('PopupOverlayOpacity', st.popupOverlayOpacity || st.PopupOverlayOpacity);
+                    setVal('PopupOverlayBlurPx', st.popupOverlayBlurPx !== undefined ? st.popupOverlayBlurPx : st.PopupOverlayBlurPx);
+                    setVal('PopupModalMaxWidth', st.popupModalMaxWidth || st.PopupModalMaxWidth);
+                    setVal('PopupAnimationType', st.popupAnimationType !== undefined ? st.popupAnimationType : st.PopupAnimationType);
+                    setVal('PopupAnimationDurationMs', st.popupAnimationDurationMs || st.PopupAnimationDurationMs);
+                    // sync range labels
+                    document.querySelectorAll('.le-popup-range').forEach(function (r) {
+                        var field = r.getAttribute('data-field');
+                        var lab = document.querySelector('.le-range-val[data-for="' + field + '"]');
+                        if (lab) lab.textContent = r.value;
+                    });
+                    applyPreview();
+                    setTimeout(playAnim, 100);
+                });
+        });
+    }
 })();
 </script>
