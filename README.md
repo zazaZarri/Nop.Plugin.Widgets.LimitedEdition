@@ -7,7 +7,7 @@ Countdown timers, multi-template cards and cart popups, scarcity (stock / sold),
 | | |
 |---|---|
 | **System name** | `Widgets.LimitedEdition` |
-| **Version** | BETA 0.6 |
+| **Version** | BETA 0.7 |
 | **nopCommerce** | 4.70 · 4.80 · 4.90 |
 | **Author** | Limited Edition |
 
