@@ -35,8 +35,11 @@
     var maxW = s.PopupModalMaxWidth > 0 ? s.PopupModalMaxWidth : 420;
     var delay = s.PopupShowDelayMs >= 0 ? s.PopupShowDelayMs : 500;
     var dur = s.PopupAnimationDurationMs > 0 ? s.PopupAnimationDurationMs : 350;
-    var overlayOp = (s.PopupOverlayOpacity > 0 ? s.PopupOverlayOpacity : 72) / 100.0;
-    var blur = s.PopupOverlayBlurPx >= 0 ? s.PopupOverlayBlurPx : 6;
+    // Overlay SEMPRE molto scuro: niente logo/categorie dietro
+    var overlayOp = Math.Max(
+        (s.PopupOverlayOpacity > 0 ? s.PopupOverlayOpacity : 92) / 100.0,
+        0.92);
+    var blur = s.PopupOverlayBlurPx >= 0 ? s.PopupOverlayBlurPx : 8;
     var anim = s.PopupAnimationType;
     var badgeLabel = string.IsNullOrWhiteSpace(s.BadgeText) ? "⚡ Edizione Limitata" : s.BadgeText;
     var ctaLabel = string.IsNullOrWhiteSpace(s.CtaText) ? "Vedi" : s.CtaText;
@@ -46,25 +49,54 @@
 }
 
 <style>
+/* Overlay a schermo intero: copre logo, menu, categorie, tutto */
 #le-cart-overlay {
-    position: fixed; inset: 0; z-index: 9998;
-    background: rgba(0,0,0,@overlayOp.ToString(System.Globalization.CultureInfo.InvariantCulture));
-    backdrop-filter: blur(@(blur)px);
-    opacity: 0; visibility: hidden;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    min-height: 100% !important;
+    z-index: 2147483000 !important;
+    background: #0a0a0a !important;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
     transition: opacity @(dur)ms ease, visibility @(dur)ms ease;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
 }
-#le-cart-overlay.is-visible { opacity: 1; visibility: visible; }
+#le-cart-overlay.is-visible {
+    opacity: @overlayOp.ToString(System.Globalization.CultureInfo.InvariantCulture) !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
 
 #le-cart-modal {
-    position: fixed; top: 50%; left: 50%; z-index: 9999;
-    width: min(@(maxW)px, calc(100% - 28px));
-    background: linear-gradient(145deg, @bgStart 0%, @bgMid 55%, @bgEnd 100%);
-    border: 1px solid @border;
-    border-radius: @(radius)px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.55);
-    opacity: 0; visibility: hidden;
-    font-family: @font;
-    overflow: hidden;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    z-index: 2147483001 !important;
+    width: min(@(maxW)px, calc(100vw - 28px)) !important;
+    max-width: calc(100vw - 28px) !important;
+    max-height: calc(100vh - 40px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    background: linear-gradient(145deg, @bgStart 0%, @bgMid 55%, @bgEnd 100%) !important;
+    border: 1px solid @border !important;
+    border-radius: @(radius)px !important;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.75) !important;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    font-family: @font !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 0 !important;
     transition: opacity @(dur)ms ease, transform @(dur)ms ease, visibility @(dur)ms ease;
 @if (anim == 0)
 {
@@ -84,59 +116,190 @@ else
 }
 }
 #le-cart-modal.is-visible {
-    opacity: 1; visibility: visible;
-    transform: translate(-50%, -50%) scale(1);
-}
-@if (s.PopupEnableGlow)
-{
-    <text>
-    #le-cart-modal { animation: le-pop-glow 3s ease-in-out infinite; }
-    @@keyframes le-pop-glow {
-        0%,100% { box-shadow: 0 20px 50px rgba(0,0,0,0.55), 0 0 20px @(accent)44; }
-        50% { box-shadow: 0 20px 50px rgba(0,0,0,0.55), 0 0 36px @(accent)88; }
-    }
-    </text>
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translate(-50%, -50%) scale(1) !important;
 }
 
-.le-modal-inner { position: relative; z-index: 1; padding: 28px 24px 22px; text-align: center; }
-.le-close {
-    position: absolute; top: 12px; right: 12px; width: 32px; height: 32px;
-    border: 1px solid @(accent)55; background: @(accent)18; border-radius: 50%;
-    color: @accentLight; cursor: pointer; display: flex; align-items: center; justify-content: center;
+#le-cart-modal .le-modal-inner {
+    position: relative;
+    z-index: 1;
+    padding: 32px 24px 22px;
+    text-align: center;
+    box-sizing: border-box;
 }
-.le-close svg { width: 14px; height: 14px; }
-.le-badge {
-    display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: 2px;
-    text-transform: uppercase; color: @badgeTextColor;
+
+#le-cart-modal .le-close,
+#le-cart-close {
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    z-index: 20 !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid @(accent)88 !important;
+    background: rgba(0,0,0,0.55) !important;
+    border-radius: 50% !important;
+    color: #fff !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: none !important;
+    outline: none !important;
+    line-height: 1 !important;
+    font-size: 0 !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    pointer-events: auto !important;
+}
+#le-cart-modal .le-close:hover,
+#le-cart-close:hover {
+    background: @(accent) !important;
+    border-color: @accent !important;
+    color: #111 !important;
+}
+#le-cart-modal .le-close svg,
+#le-cart-close svg {
+    width: 16px !important;
+    height: 16px !important;
+    display: block !important;
+    pointer-events: none !important;
+}
+
+#le-cart-modal .le-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: @badgeTextColor;
     background: linear-gradient(90deg, @badgeBg1, @badgeBg2);
-    padding: 5px 14px; border-radius: 999px; margin-bottom: 12px;
+    padding: 5px 14px;
+    border-radius: 999px;
+    margin: 0 0 12px 0;
+    line-height: 1.3;
 }
-.le-title { margin: 0 0 6px; font-size: 22px; font-weight: 700; color: @titleColor; }
-.le-message { font-size: 14px; color: @msgColor; margin: 0 0 18px; }
-.le-products { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; text-align: left; }
-.le-product {
-    display: flex; align-items: center; gap: 12px; padding: 12px 14px;
-    background: @(accent)14; border: 1px solid @(accent)44; border-radius: 12px;
+
+#le-cart-modal .le-title {
+    margin: 0 0 6px 0 !important;
+    padding: 0 36px !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+    color: @titleColor !important;
+    background: none !important;
+    border: none !important;
 }
-.le-product-name { margin: 0 0 3px; font-size: 14px; font-weight: 600; color: @titleColor; }
-.le-product-expiry { font-size: 12px; color: @accent; }
-.le-product-cta {
-    margin-left: auto; flex-shrink: 0; padding: 7px 12px;
-    background: linear-gradient(90deg, @ctaBg1, @ctaBg2); color: @ctaText !important;
-    font-size: 12px; font-weight: 700; border-radius: 999px; text-decoration: none !important;
+
+#le-cart-modal .le-message {
+    font-size: 14px !important;
+    color: @msgColor !important;
+    margin: 0 0 16px 0 !important;
+    padding: 0 !important;
+    line-height: 1.4 !important;
 }
-.le-continue {
-    display: block; width: 100%; padding: 12px 20px; background: transparent;
-    border: 1px solid @(accent)55; border-radius: 999px; color: rgba(255,255,255,0.75);
-    font-size: 13px; font-weight: 600; cursor: pointer; font-family: @font;
+
+#le-cart-modal .le-products {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    margin: 0 0 16px 0 !important;
+    padding: 0 !important;
+    text-align: left !important;
 }
-.le-continue:hover { color: @accentLight; border-color: @accent; }
+
+#le-cart-modal .le-product {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 12px 14px !important;
+    margin: 0 !important;
+    background: @(accent)14 !important;
+    border: 1px solid @(accent)44 !important;
+    border-radius: 12px !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+}
+
+#le-cart-modal .le-product-info {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+}
+
+#le-cart-modal .le-product-name {
+    margin: 0 0 3px 0 !important;
+    padding: 0 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: @titleColor !important;
+    line-height: 1.3 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+#le-cart-modal .le-product-expiry {
+    display: block !important;
+    font-size: 12px !important;
+    color: @accent !important;
+    line-height: 1.3 !important;
+}
+
+#le-cart-modal .le-product-cta {
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    padding: 8px 14px !important;
+    background: linear-gradient(90deg, @ctaBg1, @ctaBg2) !important;
+    color: @ctaText !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    border-radius: 999px !important;
+    text-decoration: none !important;
+    border: none !important;
+    white-space: nowrap !important;
+    line-height: 1.2 !important;
+}
+
+#le-cart-modal .le-continue {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 12px 20px !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border: 1px solid @(accent)55 !important;
+    border-radius: 999px !important;
+    color: rgba(255,255,255,0.85) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    font-family: @font !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+}
+#le-cart-modal .le-continue:hover {
+    color: @accentLight !important;
+    border-color: @accent !important;
+    background: @(accent)14 !important;
+}
+
+body.le-cart-popup-open {
+    overflow: hidden !important;
+}
 </style>
 
-<div id="le-cart-overlay" class="@popupTpl"></div>
-<div id="le-cart-modal" class="@popupTpl" role="dialog" aria-modal="true">
+<div id="le-cart-overlay" class="@popupTpl" aria-hidden="true"></div>
+<div id="le-cart-modal" class="@popupTpl" role="dialog" aria-modal="true" aria-labelledby="le-cart-title">
     <button type="button" class="le-close" id="le-cart-close" aria-label="Chiudi">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
         </svg>
     </button>
@@ -145,7 +308,7 @@ else
         {
             <span class="le-badge">@badgeLabel</span>
         }
-        <h2 class="le-title">@title</h2>
+        <h2 class="le-title" id="le-cart-title">@title</h2>
         <p class="le-message">@subtitle</p>
         @if (s.PopupShowProductList)
         {
@@ -153,7 +316,7 @@ else
                 @foreach (var offer in Model.Offers)
                 {
                     <div class="le-product">
-                        <div>
+                        <div class="le-product-info">
                             <p class="le-product-name">@offer.ProductName</p>
                             <span class="le-product-expiry">Scade il @offer.EndDateUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
                         </div>
@@ -168,36 +331,75 @@ else
 
 <script>
 (function () {
-    var once = @(s.PopupOncePerSession ? "true" : "false");
-    if (once && sessionStorage.getItem('leCartPopupShown')) return;
+    try {
+        var once = @(s.PopupOncePerSession ? "true" : "false");
+        if (once && sessionStorage.getItem('leCartPopupShown')) return;
 
-    var overlay = document.getElementById('le-cart-overlay');
-    var modal = document.getElementById('le-cart-modal');
-    var delay = @delay;
-    var closeOverlay = @(s.PopupCloseOnOverlayClick ? "true" : "false");
-    var closeEsc = @(s.PopupCloseOnEscape ? "true" : "false");
+        var overlay = document.getElementById('le-cart-overlay');
+        var modal = document.getElementById('le-cart-modal');
+        var btnClose = document.getElementById('le-cart-close');
+        var btnContinue = document.getElementById('le-cart-continue');
+        if (!overlay || !modal) return;
 
-    function openModal() {
-        overlay.classList.add('is-visible');
-        modal.classList.add('is-visible');
-        document.body.style.overflow = 'hidden';
-        if (once) sessionStorage.setItem('leCartPopupShown', '1');
-    }
-    function closeModal() {
-        overlay.classList.remove('is-visible');
-        modal.classList.remove('is-visible');
-        document.body.style.overflow = '';
-    }
+        // Sposta overlay + modal su body: così non restano dentro header/main del tema
+        if (overlay.parentNode !== document.body) {
+            document.body.appendChild(overlay);
+        }
+        if (modal.parentNode !== document.body) {
+            document.body.appendChild(modal);
+        }
 
-    setTimeout(openModal, delay);
+        var delay = @delay;
+        var closeOverlay = @(s.PopupCloseOnOverlayClick ? "true" : "false");
+        var closeEsc = @(s.PopupCloseOnEscape ? "true" : "false");
+        var closed = false;
 
-    document.getElementById('le-cart-close').addEventListener('click', closeModal);
-    document.getElementById('le-cart-continue').addEventListener('click', closeModal);
-    if (closeOverlay) overlay.addEventListener('click', closeModal);
-    if (closeEsc) {
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') closeModal();
-        });
+        function openModal() {
+            if (closed) return;
+            overlay.classList.add('is-visible');
+            modal.classList.add('is-visible');
+            overlay.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('le-cart-popup-open');
+            document.body.style.overflow = 'hidden';
+            if (once) {
+                try { sessionStorage.setItem('leCartPopupShown', '1'); } catch (e) {}
+            }
+        }
+
+        function closeModal(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            closed = true;
+            overlay.classList.remove('is-visible');
+            modal.classList.remove('is-visible');
+            overlay.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('le-cart-popup-open');
+            document.body.style.overflow = '';
+        }
+
+        setTimeout(openModal, Math.max(0, delay));
+
+        if (btnClose) {
+            btnClose.addEventListener('click', closeModal);
+            btnClose.addEventListener('mousedown', function (e) { e.stopPropagation(); });
+        }
+        if (btnContinue) {
+            btnContinue.addEventListener('click', closeModal);
+        }
+        if (closeOverlay) {
+            overlay.addEventListener('click', closeModal);
+        }
+        modal.addEventListener('click', function (e) { e.stopPropagation(); });
+
+        if (closeEsc) {
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' || e.keyCode === 27) closeModal(e);
+            });
+        }
+    } catch (err) {
+        if (typeof console !== 'undefined') console.warn('LimitedEdition cart popup:', err);
     }
 })();
 </script>

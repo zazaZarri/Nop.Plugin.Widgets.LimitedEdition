@@ -48,7 +48,7 @@
         --le-cta-text: @s.CtaTextColor;
         --le-digit-size: @(s.TimerDigitFontSize)px;
         --le-label-size: @(s.TimerLabelFontSize)px;
-        --le-box-min-w: @(s.TimerBoxMinWidth)px;
+        --le-box-min-w: @(s.TimerBoxMinWidth > 0 ? s.TimerBoxMinWidth : 58)px;
         --le-box-radius: @(s.TimerBoxBorderRadius)px;
         --le-box-pad: @(s.TimerBoxPadding)px;
         --le-timer-gap: @(s.TimerGap)px;
@@ -74,6 +74,9 @@
         --le-cta-radius: @(s.CtaBorderRadius)px;
         --le-font: @s.FontFamily;
         font-family: var(--le-font);
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
     .le-card {
         position: relative;
@@ -85,6 +88,9 @@
         text-align: var(--le-card-align);
         overflow: hidden;
         box-shadow: 0 12px 40px rgba(0,0,0,.35);
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
     .le-card.le-has-img {
         background-size: cover;
@@ -140,6 +146,7 @@
         color: var(--le-title);
         position: relative;
         z-index: 1;
+        word-break: break-word;
     }
     .le-message {
         font-size: var(--le-msg-size);
@@ -172,35 +179,55 @@
         border-radius: 99px;
         transition: width .5s ease;
     }
+
+    /* ===== TIMER: gap uniforme + larghezza min box funzionante ===== */
     .le-countdown {
         display: flex;
         justify-content: center;
+        align-items: stretch;
         gap: var(--le-timer-gap);
         margin: 4px 0 16px;
         position: relative;
         z-index: 1;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
     .le-layout-boxed .le-countdown {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        max-width: 320px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: var(--le-timer-gap);
+        max-width: min(100%, calc(var(--le-box-min-w) * 4 + var(--le-timer-gap) * 3));
         margin-left: auto;
         margin-right: auto;
     }
     .le-layout-minimal .le-time-box {
-        background: transparent;
-        border: none;
-        min-width: auto;
-        padding: 0 4px;
+        background: transparent !important;
+        border: none !important;
+        min-width: 0 !important;
+        width: auto !important;
+        flex: 0 0 auto !important;
+        padding: 0 4px !important;
     }
     .le-layout-minimal .le-time-box small { display: none; }
+
     .le-time-box {
+        /* Slider "Larghezza min box" controlla queste 3 proprietà */
+        flex: 0 0 var(--le-box-min-w);
+        width: var(--le-box-min-w);
         min-width: var(--le-box-min-w);
+        box-sizing: border-box;
         background: var(--le-box-bg);
         border: 1px solid var(--le-box-border);
         border-radius: var(--le-box-radius);
-        padding: var(--le-box-pad) 5px 6px;
+        padding: var(--le-box-pad) 4px 6px;
+        text-align: center;
+    }
+    .le-layout-boxed .le-time-box {
+        flex: unset;
+        width: auto;
+        min-width: 0;
     }
     .le-time-box span {
         display: block;
@@ -218,6 +245,7 @@
         text-transform: uppercase;
         color: var(--le-label);
     }
+
     .le-cta {
         position: relative;
         display: inline-block;
@@ -229,6 +257,9 @@
         border-radius: var(--le-cta-radius);
         text-decoration: none !important;
         z-index: 1;
+        max-width: 100%;
+        box-sizing: border-box;
+        text-align: center;
     }
     .le-cta.le-disabled {
         opacity: .45;
@@ -249,6 +280,31 @@
         border: 1px solid rgba(255,255,255,.12);
     }
     #le-social-toast.on { opacity: 1; transform: translateY(0); }
+
+    @@media (max-width: 480px) {
+        .le-card {
+            padding: 16px 14px 14px;
+            border-radius: calc(var(--le-card-radius) * 0.75);
+        }
+        .le-card.le-has-img { min-height: 160px; }
+        .le-badge { font-size: 10px; padding: 4px 10px; letter-spacing: 1px; margin-bottom: 8px; }
+        .le-title { font-size: 16px; margin-bottom: 4px; }
+        .le-message { font-size: 13px; margin-bottom: 8px; }
+        .le-scarcity { font-size: 12px; margin: 4px 0 8px; }
+        .le-progress { margin-bottom: 10px; }
+        .le-countdown { gap: 6px; margin: 2px 0 12px; }
+        .le-layout-boxed .le-countdown { max-width: 100%; gap: 6px; }
+        /* mobile: box uguali, possono restringersi se non c'è spazio */
+        .le-time-box {
+            flex: 1 1 0;
+            width: auto;
+            min-width: 0;
+            padding: 6px 2px 5px;
+        }
+        .le-time-box span { font-size: 18px; }
+        .le-time-box small { font-size: 8px; letter-spacing: 0.5px; margin-top: 2px; }
+        .le-cta { font-size: 13px; padding: 10px 18px; }
+    }
 </style>
 
 <div class="le-wrap @layoutClass @templateClass">
