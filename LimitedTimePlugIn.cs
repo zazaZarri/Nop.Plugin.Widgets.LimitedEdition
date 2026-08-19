@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Plugin.Widgets.LimitedEdition.Domain;
 using Nop.Plugin.Widgets.LimitedEdition.Models;
 using Nop.Services.Cms;
@@ -56,6 +53,8 @@ namespace Nop.Plugin.Widgets.LimitedEdition
             var cardDict = StyleBag.EnsureCardTemplates(null);
             var popupDict = StyleBag.EnsurePopupTemplates(null);
 
+            // Default settings in English (neutral). Store owners can change texts in admin.
+            // Public-facing labels also live in locale resources so they follow the active language.
             await _settingService.SaveSettingAsync(new LimitedTimeSettings
             {
                 SelectedCardTemplateId = 0,
@@ -63,12 +62,12 @@ namespace Nop.Plugin.Widgets.LimitedEdition
                 CardTemplatesJson = StyleBag.SerializeDict(cardDict),
                 PopupTemplatesJson = StyleBag.SerializeDict(popupDict),
 
-                CustomMessage = "Prodotto a tempo limitato! 500 copie rimaste",
-                BadgeText = "⚡ Edizione Limitata",
-                CtaText = "Vedi offerta →",
-                ExpiredText = "Offerta scaduta!",
-                DaysLabel = "Giorni",
-                HoursLabel = "Ore",
+                CustomMessage = "Limited-time product! 500 copies left",
+                BadgeText = "⚡ Limited Edition",
+                CtaText = "See offer →",
+                ExpiredText = "Offer expired!",
+                DaysLabel = "Days",
+                HoursLabel = "Hours",
                 MinutesLabel = "Min",
                 SecondsLabel = "Sec",
 
@@ -106,7 +105,7 @@ namespace Nop.Plugin.Widgets.LimitedEdition
                 PopupCloseOnEscape = true,
 
                 // Legacy defaults (Classic)
-                AccentColor = "#d4af37",
+                AccentColor = "d4af37",
                 AccentColorLight = "#f4e5a1",
                 CardBackgroundStart = "#0b0b0f",
                 CardBackgroundMid = "#1a1a22",
@@ -151,88 +150,63 @@ namespace Nop.Plugin.Widgets.LimitedEdition
                 CtaBorderRadius = 999,
                 BackgroundColor = "#d4af37",
                 TextColor = "#ffffff",
-                FontFamily = "inherit"
+                FontFamily = "inherit",
+
+                PopupTitle = "Don't miss the limited edition!",
+                PopupSubtitle = "These exclusive products are about to expire",
+                PopupContinueText = "Continue shopping",
+                PopupShowBadge = true,
+                PopupShowProductList = true,
+                PopupEnableGlow = true,
+                PopupEnableSheen = false,
+                PopupAnimationType = 1,
+                PopupAnimationDurationMs = 350,
+                PopupOverlayOpacity = 72,
+                PopupOverlayBlurPx = 6,
+                PopupModalMaxWidth = 420
             });
 
-            var resources = new Dictionary<string, string>
-            {
-                ["Plugins.Widgets.LimitedEdition.Settings.CustomMessage"] = "Messaggio personalizzato",
-                ["Plugins.Widgets.LimitedEdition.Settings.BadgeText"] = "Testo badge",
-                ["Plugins.Widgets.LimitedEdition.Settings.CtaText"] = "Testo pulsante CTA",
-                ["Plugins.Widgets.LimitedEdition.Settings.ExpiredText"] = "Testo offerta scaduta",
-                ["Plugins.Widgets.LimitedEdition.Settings.DaysLabel"] = "Etichetta giorni",
-                ["Plugins.Widgets.LimitedEdition.Settings.HoursLabel"] = "Etichetta ore",
-                ["Plugins.Widgets.LimitedEdition.Settings.MinutesLabel"] = "Etichetta minuti",
-                ["Plugins.Widgets.LimitedEdition.Settings.SecondsLabel"] = "Etichetta secondi",
-                ["Plugins.Widgets.LimitedEdition.Settings.TimerLayout"] = "Layout timer",
-                ["Plugins.Widgets.LimitedEdition.Settings.HideProductWhenExpired"] = "Nascondi prodotto scaduto",
-                ["Plugins.Widgets.LimitedEdition.Settings.ShowBadge"] = "Mostra badge",
-                ["Plugins.Widgets.LimitedEdition.Settings.ShowTitle"] = "Mostra titolo prodotto",
-                ["Plugins.Widgets.LimitedEdition.Settings.ShowMessage"] = "Mostra messaggio",
-                ["Plugins.Widgets.LimitedEdition.Settings.ShowCta"] = "Mostra pulsante CTA",
-                ["Plugins.Widgets.LimitedEdition.Settings.EnableGlowAnimation"] = "Animazione glow",
-                ["Plugins.Widgets.LimitedEdition.Settings.EnableSheenAnimation"] = "Animazione sheen",
-                ["Plugins.Widgets.LimitedEdition.Settings.AccentColor"] = "Colore accento",
-                ["Plugins.Widgets.LimitedEdition.Settings.AccentColorLight"] = "Colore accento chiaro",
-                ["Plugins.Widgets.LimitedEdition.Settings.CardBackgroundStart"] = "Sfondo card (inizio)",
-                ["Plugins.Widgets.LimitedEdition.Settings.CardBackgroundMid"] = "Sfondo card (mezzo)",
-                ["Plugins.Widgets.LimitedEdition.Settings.CardBackgroundEnd"] = "Sfondo card (fine)",
-                ["Plugins.Widgets.LimitedEdition.Settings.BorderColor"] = "Colore bordo",
-                ["Plugins.Widgets.LimitedEdition.Settings.TitleColor"] = "Colore titolo",
-                ["Plugins.Widgets.LimitedEdition.Settings.MessageColor"] = "Colore messaggio",
-                ["Plugins.Widgets.LimitedEdition.Settings.BadgeTextColor"] = "Colore testo badge",
-                ["Plugins.Widgets.LimitedEdition.Settings.BadgeBackgroundStart"] = "Sfondo badge (inizio)",
-                ["Plugins.Widgets.LimitedEdition.Settings.BadgeBackgroundEnd"] = "Sfondo badge (fine)",
-                ["Plugins.Widgets.LimitedEdition.Settings.TimerDigitColor"] = "Colore cifre timer",
-                ["Plugins.Widgets.LimitedEdition.Settings.TimerLabelColor"] = "Colore etichette timer",
-                ["Plugins.Widgets.LimitedEdition.Settings.TimerBoxBackground"] = "Sfondo box timer",
-                ["Plugins.Widgets.LimitedEdition.Settings.TimerBoxBorderColor"] = "Bordo box timer",
-                ["Plugins.Widgets.LimitedEdition.Settings.TimerDigitFontSize"] = "Dimensione cifre (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.TimerLabelFontSize"] = "Dimensione etichette (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.TimerBoxMinWidth"] = "Larghezza minima box (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.TimerBoxBorderRadius"] = "Raggio angoli box (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.TimerBoxPadding"] = "Padding box (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.TimerGap"] = "Spazio tra box (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.CardBorderRadius"] = "Raggio angoli card (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.CardPaddingTop"] = "Padding alto card (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.CardPaddingSide"] = "Padding laterale card (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.CardPaddingBottom"] = "Padding basso card (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.CardMarginBottom"] = "Margine inferiore card (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.CardBorderWidth"] = "Spessore bordo card (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.CardTextAlign"] = "Allineamento testo",
-                ["Plugins.Widgets.LimitedEdition.Settings.TitleFontSize"] = "Dimensione titolo (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.TitleFontWeight"] = "Peso font titolo",
-                ["Plugins.Widgets.LimitedEdition.Settings.MessageFontSize"] = "Dimensione messaggio (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.BadgeFontSize"] = "Dimensione badge (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.BadgeFontWeight"] = "Peso font badge",
-                ["Plugins.Widgets.LimitedEdition.Settings.BadgeLetterSpacing"] = "Spaziatura lettere badge (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.BadgePaddingY"] = "Padding verticale badge (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.BadgePaddingX"] = "Padding orizzontale badge (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.CtaBackgroundStart"] = "Sfondo CTA (inizio)",
-                ["Plugins.Widgets.LimitedEdition.Settings.CtaBackgroundEnd"] = "Sfondo CTA (fine)",
-                ["Plugins.Widgets.LimitedEdition.Settings.CtaTextColor"] = "Colore testo CTA",
-                ["Plugins.Widgets.LimitedEdition.Settings.CtaFontSize"] = "Dimensione testo CTA (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.CtaFontWeight"] = "Peso font CTA",
-                ["Plugins.Widgets.LimitedEdition.Settings.CtaPaddingY"] = "Padding verticale CTA (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.CtaPaddingX"] = "Padding orizzontale CTA (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.CtaBorderRadius"] = "Raggio angoli CTA (px)",
-                ["Plugins.Widgets.LimitedEdition.Settings.BackgroundColor"] = "Colore sfondo (legacy)",
-                ["Plugins.Widgets.LimitedEdition.Settings.TextColor"] = "Colore testo (legacy)",
-                ["Plugins.Widgets.LimitedEdition.Settings.SelectedCardTemplate"] = "Template card",
-                ["Plugins.Widgets.LimitedEdition.Settings.SelectedPopupTemplate"] = "Template popup"
-            };
-
-            foreach (var resource in resources)
-            {
-                await _localizationService.AddOrUpdateLocaleResourceAsync(resource.Key, resource.Value, "it-IT");
-            }
+            await InstallLocaleResourcesAsync();
 
             await base.InstallAsync();
         }
 
+        /// <summary>
+        /// Registers English as default for ALL languages, then culture-specific overrides
+        /// (Italian, and any other dictionaries defined in LocaleResources.ByCulture).
+        /// Store owners can further edit resources in Admin → Configuration → Languages.
+        /// </summary>
+        public async Task InstallLocaleResourcesAsync()
+        {
+            // 1) English defaults → applied to every existing language in the store
+            await _localizationService.AddOrUpdateLocaleResourceAsync(LocaleResources.English);
+
+            // 2) Culture-specific overrides (only if that language culture exists)
+            foreach (var pair in LocaleResources.ByCulture)
+            {
+                var culture = pair.Key;
+                var resources = pair.Value;
+                foreach (var resource in resources)
+                {
+                    await _localizationService.AddOrUpdateLocaleResourceAsync(
+                        resource.Key,
+                        resource.Value,
+                        culture);
+                }
+            }
+        }
+
         public override async Task UninstallAsync()
         {
-            await _settingService.DeleteSettingAsync<LimitedTimeSettings>();
+            try
+            {
+                await _settingService.DeleteSettingAsync<LimitedTimeSettings>();
+            }
+            catch
+            {
+                // settings già assenti: ok
+            }
+
             await base.UninstallAsync();
         }
     }

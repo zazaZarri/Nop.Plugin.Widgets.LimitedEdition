@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="LocaleResources.cs" />
     <Content Include="plugin.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
